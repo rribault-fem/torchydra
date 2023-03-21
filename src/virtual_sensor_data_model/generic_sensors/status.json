@@ -1,0 +1,56 @@
+{
+    "femgen model": 
+
+        {
+            "__name__": "status",
+
+            "__description__": "List of string to describe the status of sensors",
+
+            "__type__": "generic_sensors:status",
+        
+            "__properties__": [
+                {
+                    "name": "values",
+                    "type": "string",
+                    "dim": "24",
+                    "description": "List of string to describe the status of sensors : Fetch, Allocate, waiting_merge, Done, Error]"
+                },
+                {
+                    "name": "description",
+                    "value": "List of string to describe the status of sensors : [Fetch, Allocate, waiting_merge, Done, Error]",
+                    "type": "string",
+                    "description": "Metadata : Data description"
+                },
+                {
+                    "name": "unit",
+                    "value": "str",
+                    "type": "string",
+                    "description": "string list"
+                },
+                {
+                    "name": "min_value",
+                    "type": "string",
+                    "value": "Fetch",
+                    "description": "Arbitrary minimum value for sensors' status"
+                },
+                {
+                    "name": "max_value",
+                    "type": "string",
+                    "value": "Done/Error",
+                    "description": "Arbitrary maximum value for sensors' status"
+                },
+                {
+                    "name": "short_name",
+                    "type": "string",
+                    "value": "status"
+                },
+                {
+                    "name": "xr_dimensions",
+                    "type": "string",
+                    "value": "time",
+                    "description":"dimension for xarray",
+                    "export_netcdf" : "false"
+                }
+        ]
+    }
+}

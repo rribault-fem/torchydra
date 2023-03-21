@@ -1,0 +1,56 @@
+{
+    "femgen model": 
+
+        {
+            "__name__": "channel",
+
+            "__description__": "Force of tension measured by draw wire sensor",
+
+            "__type__": "generic_sensors:channel",
+        
+            "__properties__": [
+                {
+                    "name": "values",
+                    "type": "double",
+                    "dim": "*",
+                    "description": "values for the channel"
+                },
+                {
+                    "name": "Position",
+                    "type": "string",
+                    "description": "Description of the position"
+                },
+                {
+                    "name": "unit",
+                    "type": "string",
+                    "value": "N"
+                },
+                {
+                    "name": "valid_min",
+                    "type": "double",
+                    "value": "-2"
+                },
+                {
+                    "name": "valid_max",
+                    "type": "double",
+                    "value": "1e7"
+                },
+                {
+                    "name": "short_name",
+                    "type": "string",
+                    "value": "channel"
+                },
+                {
+                    "name": "description",
+                    "value": "Values of movements/tensions and so on.. measured by a specific sensor",
+                    "type": "string",
+                    "description": "Metadata : Data description"
+                },
+                {
+                    "name": "source",
+                    "type": "string",
+                    "value": ""
+                }
+        ]
+    }
+}

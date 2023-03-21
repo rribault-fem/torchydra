@@ -1,0 +1,49 @@
+{
+    "femgen model": 
+
+        {
+            "__name__": "channel_psd",
+
+            "__description__": "Data model representing spectral density mesured by sensor",
+
+            "__type__": "generic_sensors:channel_psd",
+        
+            "__properties__": [
+                {
+                    "name": "values",
+                    "type": "double",
+                    "dim": "*,*",
+                    "description": "power spectral density with the following index : (time, frequency)"
+                },
+                {
+                    "name": "unit",
+                    "value": "[m**2/Hz]",
+                    "type": "string",
+                    "description": "Power Spectral Density in m**2 / Hz"
+                },
+                {
+                    "name": "min_value",
+                    "type": "double",
+                    "value": "0",
+                    "description": "Arbitrary minimum value of frequency and power spectral density ."
+                },
+                {
+                    "name": "max_value",
+                    "type": "double",
+                    "value": "100",
+                    "description": "Arbitrary maximum value of frequency and power spectral density."
+                },
+                {
+                    "name": "short_name",
+                    "type": "string",
+                    "value": "channel_psd"
+                },
+                {
+                    "name": "description",
+                    "value": "Values of the power spectral density from movements measured by a specific sensor",
+                    "type": "string",
+                    "description": "Metadata : Data description"
+                }
+        ]
+    }
+}
