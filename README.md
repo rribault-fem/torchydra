@@ -4,7 +4,10 @@ This script trains a surrogate model using the specified configuration.
 
 ## Configuration
 
-The configuration is stored in a YAML file and can be modified to change the behavior of the training process. The `PipeConfig` class is used to store the configuration.
+The configuration is stored in a YAML file and can be modified to change the behavior of the training process. 
+The management of YAML file is based on the hydra package : https://hydra.cc/docs/intro/
+The `PipeConfig` class is used to store the configuration. 
+This class is defined in config_schema.py and is used to validate the configuration YAML file.
 
 ## Outputs
 The trained model, logs, experiment configuration and environments used during training are saved in the `outputs` directory.
