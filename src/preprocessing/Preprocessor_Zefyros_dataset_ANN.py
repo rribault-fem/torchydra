@@ -352,6 +352,21 @@ def Scale_Yspectrum_data(Y_numpy_channels_training_set:np.array, Y_numpy_channel
 
 # a function which decompose 0 to 365 values to cos and sin values
 def get_cos_sin_decomposition(dict_key:dict, df:xr.Dataset):
+    """
+    This function decomposes 0 to 365 values into cosine and sine values. It takes in a dictionary and an xarray Dataset as input.
+
+    The function first logs information about the decomposition. 
+    It then calculates the cosine and sine values for each magnitude and angle specified in the input dictionary.
+
+    The calculated cosine and sine values are then merged into the input Dataset.
+
+    Args:
+        dict_key (dict): A dictionary containing magnitude-angle pairs to be decomposed.
+        df (xr.Dataset): An xarray Dataset containing the data to be decomposed.
+
+    Returns:
+        xr.Dataset: An xarray Dataset containing the original data as well as the calculated cosine and sine values.
+    """
     log = logging.getLogger('train_surrogate')
     log.info('###')
     log.info(f'get cos and sin decomposition of the data {dict_key}')

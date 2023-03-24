@@ -14,7 +14,16 @@ class Y_spectrum_scaler :
     scalers : Optional[List] = None
 
     def scale_data(self, Y_numpy_channels_training_set : np.array, Y_numpy_channels_test_set: np.array) ->  Tuple[np.array, np.array]:
-        """ This function perform the pca on the y data"""
+        """
+        This method scales the data using the specified scaler by self.scaler_option.
+
+        Args:
+            Y_numpy_channels_training_set (np.array): A numpy array containing the training set data.
+            Y_numpy_channels_test_set (np.array): A numpy array containing the testing set data.
+
+        Returns:
+            tuple: A tuple containing two elements: y_train and y_test.
+        """
         
         log = logging.getLogger('train_surrogate')
         log.info('scale the y spectrum data')

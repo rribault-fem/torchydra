@@ -24,6 +24,21 @@ cs.store(name="config_schema", node=PipeConfig)
 @hydra.main(config_path="configs", config_name="config.yaml")
 
 def main(cfg :  DictConfig):
+        """
+        This function serves as the main entry point for the script. It takes in a configuration object and uses it to train a surrogate model.
+
+        The function first creates an instance of the `PipeConfig` class using the provided configuration. It then pre-processes the data using the `Pre_process_data` function.
+
+        After pre-processing, the pipeline is saved for future use. The specified model type is then imported and trained on the pre-processed data using the `Train_model` function.
+
+        Finally, after training, both the pipeline and trained model are saved for future use.
+
+        Args:
+        cfg (DictConfig): The configuration object used to specify training parameters.
+
+        Returns:
+        None
+        """
 
         pipe = PipeConfig(**cfg)
         
@@ -50,7 +65,21 @@ def main(cfg :  DictConfig):
 
 
 def Pre_process_data(pipe : PipeConfig):
-        
+        """
+        This function pre-processes the data before training. It takes in an instance of the `PipeConfig` class and uses it to perform various operations on the data.
+
+        The function first loads the dataset and drops any missing values. It then creates a dictionary to store the units of each variable.
+
+        Next, direction columns are rearranged to fit with neural networks. This is done using the `get_cos_sin_decomposition` function.
+
+        After rearranging direction columns, the data is split into training and testing sets using the specified split transform. The input data is then scaled using the specified scaler.
+
+        Args:
+        pipe (PipeConfig): An instance of the `PipeConfig` class containing configuration information.
+
+        Returns:
+        tuple: A tuple containing four elements: X_train, X_test, Y_train, Y_test.
+        """
         ####
         #Start pipeline
         ####

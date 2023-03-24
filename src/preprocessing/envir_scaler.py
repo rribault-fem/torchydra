@@ -13,7 +13,16 @@ class Envir_scaler :
     scaler : Optional[TransformerMixin] = None # can be any sklearn transformer or a custom transformer
 
     def scale_data(self, X_numpy_channels_training_set : np.array, X_numpy_channels_test_set: np.array) -> Tuple[np.array, np.array]:
-        
+        """
+        This method scales the data using the specified scaler.
+
+        Args:
+            X_numpy_channels_training_set (np.array): A numpy array containing the training set data.
+            X_numpy_channels_test_set (np.array): A numpy array containing the testing set data.
+
+        Returns:
+            tuple: A tuple containing two elements: x_numpy_channels_training_set and x_numpy_channels_val_set.
+        """
         log = logging.getLogger('train_surrogate')
         # Select user defined Scaler
         log.info('###')

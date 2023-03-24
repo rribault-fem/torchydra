@@ -8,12 +8,42 @@ import random
 
 @dataclass
 class Split_transform :
+    """
+    This class provides methods for splitting data into training and testing sets.
+
+    The `process_data` method selects the split method specified in the configuration and uses it to split the data. The training set environment is then saved and the data is transformed into numpy arrays.
+
+    The user can define a custom split method by adding a method to this class and specifying its name in the configuration file.
+
+    Attributes:
+        test_nb (int): The number of tests to perform.
+        cluster (int): The number of clusters to use.
+        split_method (str): The name of the split method to use.
+        envir_bin (dict): A dictionary containing information about environment binning.
+
+    Methods:
+        process_data: Splits the data into training and testing sets using the specified split method. Transforms the data into numpy arrays.
+    """
+
     test_nb : int
     cluster: int
     split_method : str
     envir_bin : dict
 
     def process_data(self, df : xr.Dataset, X_channel_list : List[str], Y_channel_list : List[str], df_train_set_envir_filename: str ) -> Tuple[np.array, np.array]:
+        """
+        This method splits the data into training and testing sets using the specified split method. The training set environment is saved and the data is transformed into numpy arrays.
+
+        Args:
+            df (xr.Dataset): An xarray Dataset containing the data to be split.
+            X_channel_list (List[str]): A list of strings specifying the input channels.
+            Y_channel_list (List[str]): A list of strings specifying the output channels.
+            df_train_set_envir_filename (str): The filename to use when saving the training set environment.
+
+        Returns:
+            tuple: A tuple containing four elements: X_train, X_test, Y_train, Y_test.
+        """
+        
         log = logging.getLogger('train_surrogate')
         log.info('###')
 
@@ -43,7 +73,20 @@ class Split_transform :
                                                  df_train_set_envir = None, 
                                                  cut_low_frequency=1/35) :
 
+        """
+        This method transforms training and testing sets from xarray Datasets to numpy arrays.
 
+        Args:
+            df_training_set (xr.Dataset): An xarray Dataset containing the training set data.
+            df_test_set (xr.Dataset): An xarray Dataset containing the testing set data.
+            X_channel_list (List[str]): A list of strings specifying the input channels.
+            Y_channel_list (List[str]): A list of strings specifying the output channels.
+            df_train_set_envir (Optional[xr.Dataset]): An optional xarray Dataset containing the training set environment. Defaults to None.
+            cut_low_frequency (float): The cutoff frequency to use when filtering low-frequency signals. Defaults to 1/35.
+
+        Returns:
+            tuple: A tuple containing four elements: X_train, X_test, Y_train, Y_test.
+        """
         # anomaly = False
         # if 'Flag_anomaly' in X_channel_list :
         #     anomaly = True
