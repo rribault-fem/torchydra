@@ -1,9 +1,0 @@
-# config.yaml file for hydra
-# This is the default config file for hydra
-# It is used to configure the training and testing of the model and the dataset
-
-
-# List of config parameters for train_conv1D_surrogate.py
-defaults:
-  - preprocessing: window_size=500, overlap=100, n_components=10, scaler={feature_range: [-1, 1]}
-  - network: num_filters=64, kernel_size=5, activation=relu, optimizer=adam, learning_rate=0.001, batch_size=32, epochs=50

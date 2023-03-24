@@ -1,0 +1,11 @@
+# Data & Models
+*.nc
+*.tar
+*.tar.gz
+
+outputs/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class

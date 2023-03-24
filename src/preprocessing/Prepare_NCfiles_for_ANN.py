@@ -8,7 +8,7 @@ Created on Thu Dec 19 08:55:18 2019
 import xarray as xr
 import pandas as pd
 import numpy as np
-
+import logging
 
 def MinMaxFinder(X):
     '''
@@ -128,7 +128,8 @@ def preprocess_ncdf_to_transcient_ann(df_filename, key) :
     
     #check same length between X_tot and y_tot
     if len(X_tot) != len(y_tot):
-        print('WARNING: X and Y do not have same length')
+        log = logging.getLogger('train_surrogate') 
+        log.info('WARNING: X and Y do not have same length')
 
     return X_tot, y_tot
     
@@ -259,7 +260,8 @@ def preprocess_ncdf_to_fatigue_regressor(df_filename, key) :
     
     #check same length between X_tot and y_tot
     if len(X_tot) != len(y_tot):
-        print('WARNING: X and Y do not have same length')
+        log = logging.getLogger('train_surrogate') 
+        log.info('WARNING: X and Y do not have same length')
 
     return X_tot, y_tot
 
