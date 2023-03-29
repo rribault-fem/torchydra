@@ -52,7 +52,7 @@ class SurrogateModule(LightningModule):
         self.val_mse_best = MaxMetric()
 
     def forward(self, x: torch.Tensor):
-        return self.net(x)
+        return self.net.forward(x)
 
     def on_train_start(self):
         # by default lightning executes validation step sanity checks before training starts,
@@ -63,7 +63,7 @@ class SurrogateModule(LightningModule):
 
     def model_step(self, batch: Any):
         x, y = batch
-        preds = self.forward(x)
+        preds = self.net.forward(x)
         loss = self.criterion(preds, y)
         return loss, preds, y
 

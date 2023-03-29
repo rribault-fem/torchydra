@@ -1,5 +1,6 @@
 import torch.nn as nn
 import numpy as np
+from torchinfo import summary
 
 class conv1D_surr(nn.Module):
     """
@@ -16,25 +17,32 @@ class conv1D_surr(nn.Module):
     def __init__(self,  x_input_size: int, spectrum_decomp_length:int, spectrum_channel_nb: int):
         super().__init__()
         self.spectrum_channel_nb = spectrum_channel_nb
-        self.x_input_size = x_input_size+1
+        self.x_input_size = x_input_size
         self.spectrum_decomp_length = spectrum_decomp_length
         # Define the layers of the neural network
-        self.Dense1 = nn.Linear(x_input_size, 128)
+        self.Dense1 = nn.Linear(self.x_input_size, 128)
         self.Dense2 = nn.Linear(128, 64)
         self.Dense3 = nn.Linear(64, 32)
         self.Dense4 = nn.Linear(32, 16)
 
 
         # Decode the encoded input using Conv1DTranspose
-        # first use wide kernel size to learn the global structure and interraction between channels
-        self.Conv1DT1 = nn.ConvTranspose1d(1, 32, kernel_size=32, stride=2, padding=16, output_padding=1, bias=False)
-        self.Conv1DT2 = nn.ConvTranspose1d(32, 64, kernel_size=16, stride=2, padding=8, output_padding=1, bias=False)
-        self.Conv1DT3 = nn.ConvTranspose1d(64, 128, kernel_size=8, stride=2, padding=4, output_padding=1, bias=False)
+        self.Conv1DT1 = nn.ConvTranspose1d(16, 32, kernel_size=32, stride=2 )
+        self.Conv1DT2 = nn.ConvTranspose1d(32, 64, kernel_size=2, stride=2 )
+        self.Conv1DT3 = nn.ConvTranspose1d(64, 128, kernel_size=2, stride=2)
         # then use narrow kernel size to learn the local structure
-        self.Conv1DT4 = nn.ConvTranspose1d(128, 64, kernel_size=4, stride=2, padding=1, output_padding=1, bias=False)
-        self.Conv1DT5 = nn.ConvTranspose1d(64, 32, kernel_size=2, stride=2, padding=0, output_padding=1, bias=False)
+        self.Conv1DT4 = nn.ConvTranspose1d(128, 256, kernel_size=2, stride=2)
+        self.Conv1DT5 = nn.ConvTranspose1d(256, 512, kernel_size=2, stride=2)
         # finally filter the output to get the desired output shape
-        self.Conv1D = nn.Conv1d(spectrum_decomp_length, spectrum_channel_nb, kernel_size=4, stride=2, padding=1, bias=False)
+        self.Conv1D1 = nn.Conv1d(512,256,kernel_size=2,stride=2)
+        self.Conv1D2 = nn.Conv1d(256,128,kernel_size=2,stride=2)
+        self.Conv1D3 = nn.Conv1d(128,64,kernel_size=2,stride=2)
+
+        stride = 2
+        k_size = 32-(self.spectrum_decomp_length-1)*stride
+        self.Conv1D5 = nn.Conv1d(64,self.spectrum_channel_nb,kernel_size=k_size,stride=stride)
+
+        summary(self, input_size=(self.x_input_size,))     
 
     def forward(self, x):
         """
@@ -53,7 +61,7 @@ class conv1D_surr(nn.Module):
         x = nn.functional.relu(self.Dense4(x))
 
         # Reshape encoded input to a 3D tensor with shape (None, 1, 16)
-        x = x.view(1,16)
+        x = x.view(-1, 16, 1)
 
         # Decode the encoded input using Conv1DTranspose
         # first use wide kernel size to learn the global structure and interraction between channels
@@ -64,8 +72,14 @@ class conv1D_surr(nn.Module):
         x = nn.functional.relu(self.Conv1DT4(x))
         x = nn.functional.relu(self.Conv1DT5(x))
         # finally filter the output to get the desired output shape
-        for i in range(4):
-            x = nn.functional.relu(self.Conv1D(x))
+        x = nn.functional.relu(self.Conv1D1(x))
+        x = nn.functional.relu(self.Conv1D2(x))
+        x = nn.functional.relu(self.Conv1D3(x))
+        x = nn.functional.relu(self.Conv1D4(x))
+        x = nn.functional.relu(self.Conv1D5(x))
+        x= x.permute(0, 2, 1)
+        # for i in range(1):
+        #     x = nn.functional.relu(self.Conv1D(x))
         return x
 
         
@@ -91,3 +105,9 @@ class conv1D_surr(nn.Module):
 
     #     self.history = pd.DataFrame(history.history)
     #     self.history['epoch'] = self.history.index.values
+
+if __name__ == '__main__':
+    # Test the model
+    model = conv1D_surr(6, 23, 6)
+    batch_size = 32
+    summary(model, input_size = (batch_size, 7))

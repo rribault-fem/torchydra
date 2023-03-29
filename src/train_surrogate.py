@@ -19,11 +19,13 @@ log = logging.getLogger('train_surrogate')
 @hydra.main(config_path="configs", config_name="config.yaml", version_base="1.1")
 def main(cfg :  DictConfig):
         """
-        This function serves as the main entry point for the script. It takes in a configuration object and uses it to train a surrogate model.
+        This function serves as the main entry point for the script.
+        It takes in a configuration object from hydra coinfig files and uses it to train a surrogate model.
+        The function first creates an instance of the `Preprocessing` class using the provided configuration. 
+        It then pre-processes the data using the `Pre_process_data` function.
 
-        The function first creates an instance of the `PipeConfig` class using the provided configuration. It then pre-processes the data using the `Pre_process_data` function.
-
-        After pre-processing, the pipeline is saved for future use. The specified model type is then imported and trained on the pre-processed data using the `Train_model` function.
+        After pre-processing, the Preprocessing object is saved for future use. 
+        The specified model type is then imported and trained on the pre-processed data using the `Train_model` function.
 
         Finally, after training, both the pipeline and trained model are saved for future use.
 
@@ -53,7 +55,7 @@ def main(cfg :  DictConfig):
         # import  model type
         import importlib
         model_net = importlib.import_module("model.components."+cfg.model_net_component)
-        model_net = getattr(model_net, cfg.model_net_component)(spectrum_channel_nb, x_input_size, spectrum_decomp_length)
+        model_net = getattr(model_net, cfg.model_net_component)(x_input_size, spectrum_decomp_length, spectrum_channel_nb)
         model : SurrogateModule = hydra.utils.instantiate(cfg.model)
         # Cannot be instanciated in the config file because it depends on the dataset:
         model.net = model_net
