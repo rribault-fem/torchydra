@@ -1,0 +1,16 @@
+# Environmental variables
+envir_variables: 
+  - dp
+  - tp
+  - hs
+  - mag10
+  - theta10
+
+# Neuron variables
+neuron_variables:
+  - NeurNode1ALxt_psd
+  - NeurNode1ALyt_psd
+  - NeurNode1ALzt_psd
+  - NeurNode3ALxt_psd
+  - NeurNode3ALyt_psd
+  - NeurNode3ALzt_psd

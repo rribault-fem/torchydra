@@ -1,9 +1,7 @@
-import torch
 import torch.nn as nn
-import surrogate.surrogate as surr
 import numpy as np
 
-class conv1D_surr(nn.Module, surr):
+class conv1D_surr(nn.Module):
     """
     A PyTorch Lightning module representing a 1D convolutional neural network
     for surrogate modeling of data.
@@ -15,17 +13,17 @@ class conv1D_surr(nn.Module, surr):
     Returns:
         torch.Tensor: A tensor representing the output of the convolutional neural network.
     """
-    def __init__(self, spectrum_channel_nb: int, x_features_nb: int):
+    def __init__(self,  x_input_size: int, spectrum_decomp_length:int, spectrum_channel_nb: int):
         super().__init__()
-
+        self.spectrum_channel_nb = spectrum_channel_nb
+        self.x_input_size = x_input_size+1
+        self.spectrum_decomp_length = spectrum_decomp_length
         # Define the layers of the neural network
-        self.Dense1 = nn.Linear(x_features_nb, 128)
+        self.Dense1 = nn.Linear(x_input_size, 128)
         self.Dense2 = nn.Linear(128, 64)
         self.Dense3 = nn.Linear(64, 32)
         self.Dense4 = nn.Linear(32, 16)
 
-        # Reshape encoded input to a 3D tensor with shape (None, 1, 16)
-        self.Reshape = nn.Reshape((16, 1))
 
         # Decode the encoded input using Conv1DTranspose
         # first use wide kernel size to learn the global structure and interraction between channels
@@ -36,7 +34,7 @@ class conv1D_surr(nn.Module, surr):
         self.Conv1DT4 = nn.ConvTranspose1d(128, 64, kernel_size=4, stride=2, padding=1, output_padding=1, bias=False)
         self.Conv1DT5 = nn.ConvTranspose1d(64, 32, kernel_size=2, stride=2, padding=0, output_padding=1, bias=False)
         # finally filter the output to get the desired output shape
-        self.Conv1D = nn.Conv1d(32, spectrum_channel_nb, kernel_size=4, stride=2, padding=1, bias=False)
+        self.Conv1D = nn.Conv1d(spectrum_decomp_length, spectrum_channel_nb, kernel_size=4, stride=2, padding=1, bias=False)
 
     def forward(self, x):
         """
@@ -55,7 +53,7 @@ class conv1D_surr(nn.Module, surr):
         x = nn.functional.relu(self.Dense4(x))
 
         # Reshape encoded input to a 3D tensor with shape (None, 1, 16)
-        x = self.Reshape(x)
+        x = x.view(1,16)
 
         # Decode the encoded input using Conv1DTranspose
         # first use wide kernel size to learn the global structure and interraction between channels
@@ -71,25 +69,25 @@ class conv1D_surr(nn.Module, surr):
         return x
 
         
-    def train_surrogate(self, x_train : np.array, x_test: np.array, y_train: np.array, y_test: np.array,
-                         epochs : int =100, batch_size : int =32, loss : str = 'mse', learn_rate : float =0.001, dropout_rate : float =0.3, verbose : int =1) :
-        """Train the autoencoder on the given data"""
+    # def train_surrogate(self, x_train : np.array, x_test: np.array, y_train: np.array, y_test: np.array,
+    #                      epochs : int =100, batch_size : int =32, loss : str = 'mse', learn_rate : float =0.001, dropout_rate : float =0.3, verbose : int =1) :
+    #     """Train the autoencoder on the given data"""
         
-        # Define the model
-        self.compile(optimizer=Adam(learning_rate=learn_rate), loss=loss)
+    #     # Define the model
+    #     self.compile(optimizer=Adam(learning_rate=learn_rate), loss=loss)
 
-        # create a TensorBoard callback
-        tensorboard_callback = TensorBoard(log_dir='./tb_logs')
+    #     # create a TensorBoard callback
+    #     tensorboard_callback = TensorBoard(log_dir='./tb_logs')
 
-        history = self.fit(
-            x_train,
-            y_train,
-            epochs=epochs,
-            batch_size=batch_size,
-            validation_data=(x_test, y_test),
-            verbose=verbose,
-            callbacks=[tensorboard_callback]
-        )
+    #     history = self.fit(
+    #         x_train,
+    #         y_train,
+    #         epochs=epochs,
+    #         batch_size=batch_size,
+    #         validation_data=(x_test, y_test),
+    #         verbose=verbose,
+    #         callbacks=[tensorboard_callback]
+    #     )
 
-        self.history = pd.DataFrame(history.history)
-        self.history['epoch'] = self.history.index.values
+    #     self.history = pd.DataFrame(history.history)
+    #     self.history['epoch'] = self.history.index.values

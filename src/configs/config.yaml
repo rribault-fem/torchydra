@@ -2,100 +2,41 @@
 # This is the default config file for hydra
 # It is used to configure the training and testing of the model and the dataset
 
-# @package _global_
+_target_: config_schema.Preprocessing
 
-# specify here default configuration
-# order of defaults determines the order in which configs override each other
 defaults:
   - _self_
-  # - hydra: default.yaml
-  # - models: conv1D.yaml 
+  - hydra: default.yaml
+  - preprocessing: default.yaml
+  - model : surrogate_module.yaml
+  - trainer: cpu.yaml
+  - callbacks : default.yaml
+  - ml_logger: tensorboard.yaml
+  - data : surrogate.yaml
 
-# task name, determines output directory path
-task_name: "train_surrogate"
+task_name: "train_surrogate"        # task name, determines output directory path
 
-inputs_outputs :
+model_net_component : conv1D_surr   # Name of the model to use. the .py file and the class shall have the same name and be located in src\model\components
 
-  # Environmental variables
-  envir_variables: 
-    - dp
-    - tp
-    - hs
-    - mag10
-    - theta10
+# tags to help you identify your experiments
+# you can overwrite this in experiment configs
+# overwrite from command line with `python train.py tags="[first_tag, second_tag]"`
+tags: ["dev"]
 
-  # Neuron variables
-  neuron_variables:
-    - NeurNode1ALxt_psd
-    - NeurNode1ALyt_psd
-    - NeurNode1ALzt_psd
-    - NeurNode3ALxt_psd
-    - NeurNode3ALyt_psd
-    - NeurNode3ALzt_psd
+# set False to skip model training
+train: True
 
-paths :
-  dataset : C:\Users\romain.ribault\Documents\Dionysos\echanges_Morphosense\Windeurope_dataset\reference_dataset_Zefyros_windeurope.nc
-  training_env_dataset: ./envir_training_db.nc
+# evaluate on test set, using best model weights achieved during training
+# lightning chooses best weights based on the metric specified in checkpoint callback
+test: True
 
-preprocessing : 
-    # Split transform step : split the dataset into a training and a test set
-    # Then transform the xr:datasets into numpy arrays
-  split_transform : 
-    _target_ : preprocessing.split_transform.Split_transform 
-      # Number of test samples and clusters
-    test_nb : 40
-    cluster: 3
+# compile model for faster training with pytorch 2.0
+compile: False
 
-    # Name of the method to use for the split (cf.py file) : current option available
-    split_method : find_test_set_in_model_validity_domain
-    
-    # Environment variables used to pre-define the validity domain of the model
-    envir_bin : 
-      hs: 2
-      tp: 2
-      dp: 45
-      mag10: 2
-      theta10: 45
+# simply provide checkpoint path to resume training
+ckpt_path: null
 
-  # Environmental direction dictionary
-  envir_scaler:
-    # The target class that will be instanciated thanks to  
-    _target_: preprocessing.envir_scaler.Envir_scaler
-    # name of the method to use for the scaling (cf.py file) : current option available MinMaxScaler or StandardScaler
-    scaler_option : MinMaxScaler
-  
-  perform_decomp : True
-  decomp_y_spectrum :
-    _target_ : preprocessing.decomp_y_spectrum.Decomp_y_spectrum
-    # name of the method to use for the decomposition (cf.py file) : current option available PCA or ICA
-    decomp_option : PCA
-    decomp_n_component : 32
+# seed for random number generators in pytorch, numpy and python.random
+seed: null
 
-  y_spectrum_scaler :
-    _target_ : preprocessing.y_spectrum_scaler.Y_spectrum_scaler
-    # name of the method to use for the scaling (cf.py file) : current option available MinMaxScaler or StandardScaler
-    scaler_option : MinMaxScaler
-
-  envir_direction_dict:
-    mag10: theta10
-    hs: dp
-  
-
-  # Frequency range for training
-  cut_low_frequency: 0.02857142857
-
-model :
-  # Model parameters
-  model_type: conv1D_surr
-  name: model_1DConvT
-  version: v1
-  dropout_rate: 0.2
-
-trainer :
-  # Training parameters
-  epochs: 100
-  batch_size: 32
-  loss: mse
-  learning_rate: 0.001
-  
 

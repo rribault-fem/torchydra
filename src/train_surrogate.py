@@ -1,28 +1,22 @@
-
 import xarray as xr
 import numpy as np
 import pickle
 import hydra
-from hydra.core.config_store import ConfigStore
 from omegaconf import DictConfig
 import logging
-from config_schema import PipeConfig
-
-from preprocessing.Preprocessor_Zefyros_dataset_ANN import  get_cos_sin_decomposition
-from preprocessing.envir_scaler import Envir_scaler
-from preprocessing.decomp_y_spectrum import Decomp_y_spectrum
-from preprocessing.y_spectrum_scaler import Y_spectrum_scaler
-from preprocessing.split_transform import Split_transform
-from models.surrogate.surrogate import SurrogateModel
-
+from config_schema import Preprocessing
+from model.surrogate_module import SurrogateModule
 from sklearn.utils import shuffle
+from lightning import Callback, LightningDataModule, LightningModule, Trainer
+from lightning.pytorch.loggers import Logger
+import torch
+from typing import List
+import utils
 
 log = logging.getLogger('train_surrogate')
-cs = ConfigStore.instance()
-cs.store(name="config_schema", node=PipeConfig)
 
-@hydra.main(config_path="configs", config_name="config.yaml")
-
+# version_base=1.1 is used to make hydra change the current working directory to the hydra output path
+@hydra.main(config_path="configs", config_name="config.yaml", version_base="1.1")
 def main(cfg :  DictConfig):
         """
         This function serves as the main entry point for the script. It takes in a configuration object and uses it to train a surrogate model.
@@ -40,23 +34,69 @@ def main(cfg :  DictConfig):
         None
         """
 
-        pipe = PipeConfig(**cfg)
+        log.info(f"Instantiating Preprocessing <{cfg.preprocessing._target_}>")
+        preprocess: Preprocessing = hydra.utils.instantiate(cfg.preprocessing)
         
         # Pre-process data
-        x_train, y_train, x_test, y_test = Pre_process_data(pipe)
+        x_train, y_train, x_test, y_test = Pre_process_data(preprocess)
         
         # save the pipeline for future use and inverse transform
-        log.info("Saving pipeline")
-        file_path = 'pipeline.pkl'
+        log.info("Saving preprocessing")
+        file_path = 'preprocessing.pkl'
         with open(file_path, 'wb') as f:
-                pickle.dump(pipe, f)
+                pickle.dump(preprocess, f)
 
+        x_input_size, spectrum_decomp_length, spectrum_channel_nb = np.shape(x_train)[1], np.shape(y_train)[1], np.shape(y_train)[2]
+
+        # instanciate model, with parameters depending on dataset.
+        log.info(f"Importing {cfg.model_net_component} model")
         # import  model type
         import importlib
-        surrogate = importlib.import_module("models."+pipe.model.model_type)
-        surrogate = getattr(surrogate, pipe.model.model_type)
-        # Train model
-        log.info(f"Training {pipe.model.model_type} model")
+        model_net = importlib.import_module("model.components."+cfg.model_net_component)
+        model_net = getattr(model_net, cfg.model_net_component)(spectrum_channel_nb, x_input_size, spectrum_decomp_length)
+        model : SurrogateModule = hydra.utils.instantiate(cfg.model)
+        # Cannot be instanciated in the config file because it depends on the dataset:
+        model.net = model_net
+
+        log.info(f"Instantiating datamodule <{cfg.data._target_}>")
+        datamodule: LightningDataModule = hydra.utils.instantiate(cfg.data)
+        datamodule.setup(x_train = x_train, y_train= y_train, x_test=x_test, y_test=y_test)
+        
+        log.info("Instantiating callbacks...")
+        callbacks: List[Callback] = utils.instantiate_callbacks(cfg.get("callbacks"))
+
+        log.info("Instantiating loggers...")
+        logger: List[Logger] = utils.instantiate_loggers(cfg.get("ml_logger"))
+        
+        log.info(f"Instantiating trainer <{cfg.trainer._target_}>")
+        trainer: Trainer = hydra.utils.instantiate(cfg.trainer, callbacks=callbacks, logger=logger)
+
+        object_dict = {
+                "cfg": cfg,
+                "datamodule": datamodule,
+                "model": model,
+                "callbacks": callbacks,
+                "logger": logger,
+                "trainer": trainer,
+        }
+
+        if logger:
+                log.info("Logging hyperparameters!")
+                utils.log_hyperparameters(object_dict)
+
+        if cfg.get("compile"):
+                log.info("Compiling model!")
+                model = torch.compile(model)
+
+        if cfg.get("train"):
+                log.info("Starting training!")
+                trainer.fit(model=model, datamodule=datamodule, ckpt_path=cfg.get("ckpt_path"))
+
+        train_metrics = trainer.callback_metrics
+
+
+        return
+
         Train_model(pipe, surrogate, x_train, y_train, x_test, y_test)
 
         # Save model
@@ -64,7 +104,7 @@ def main(cfg :  DictConfig):
 
 
 
-def Pre_process_data(pipe : PipeConfig):
+def Pre_process_data(pipe : Preprocessing):
         """
         This function pre-processes the data before training. It takes in an instance of the `PipeConfig` class and uses it to perform various operations on the data.
 
@@ -83,7 +123,7 @@ def Pre_process_data(pipe : PipeConfig):
         ####
         #Start pipeline
         ####
-        df = xr.open_dataset(pipe.paths.dataset)
+        df = xr.open_dataset(pipe.paths['dataset'])
         df = df.dropna(dim='time', how='any')
 
         unit_dictionnary = {}
@@ -95,43 +135,41 @@ def Pre_process_data(pipe : PipeConfig):
         ####
         # Re-arrange direction columns because 0/360 discontinuity do not fit with neural networks.
         ####
-        for dict_key in [{'mag10':'theta10'}, {'hs':'dp'}] : #, {'cur':'cur_dir'}] :
-                df = get_cos_sin_decomposition(dict_key, df)
-                for magnitude, angle in dict_key.items() :
-                        pipe.inputs_outputs.envir_variables.remove(angle)
-                        pipe.inputs_outputs.envir_variables.append(f'{magnitude}_cos')
-                        pipe.inputs_outputs.envir_variables.append(f'{magnitude}_sin')
+        if pipe.feature_eng.envir_direction_dict is not None :
+                # Select the sin_cos_method 
+                # The user can define a custom  method by adding a method to this class and then replace the sin_cos_method name to the hydra config file
+                if hasattr(pipe.feature_eng, pipe.feature_eng.sin_cos_method):
+                        log.info(f" run <{pipe.feature_eng.sin_cos_method}> method")
+                        df = getattr(pipe.feature_eng, pipe.feature_eng.sin_cos_method ) (pipe.feature_eng.envir_direction_dict, df)
+                        for magnitude, angle in pipe.feature_eng.envir_direction_dict.items() :
+                                pipe.inputs_outputs.envir_variables.remove(angle)
+                                pipe.inputs_outputs.envir_variables.append(f'{magnitude}_cos')
+                                pipe.inputs_outputs.envir_variables.append(f'{magnitude}_sin')
         
         ####
         # Split data into train and test sets. 
         ####
-        log.info(f"Instantiating split_transform <{pipe.preprocessing.split_transform._target_}>")
-        split_transform: Split_transform = hydra.utils.instantiate(pipe.preprocessing.split_transform)
-        X_train, X_test, Y_train, Y_test = split_transform.process_data(df=df, 
+        # log.info(f"Instantiating split_transform <{pipe.preprocessing.split_transform._target_}>")
+        # split_transform: Split_transform = hydra.utils.instantiate(pipe.preprocessing.split_transform)
+        X_train, X_test, Y_train, Y_test = pipe.split_transform.process_data(df=df, 
                                                                         X_channel_list=pipe.inputs_outputs.envir_variables,
                                                                         Y_channel_list=pipe.inputs_outputs.neuron_variables,
                                                                         df_train_set_envir_filename=pipe.paths.training_env_dataset)
         ####
         # Scale input data with scaler defined in hydra config file
         ####
-        log.info(f"Instantiating envir_scaler <{pipe.preprocessing.envir_scaler._target_}>")
-        envir_scaler: Envir_scaler = hydra.utils.instantiate(pipe.preprocessing.envir_scaler)
-        x_train, x_test  = envir_scaler.scale_data(X_train, X_test)
+        x_train, x_test  = pipe.envir_scaler.scale_data(X_train, X_test)
 
         ####
         # Decompose y data with decomposition methode defined in hydra config file
         #### 
-        if pipe.preprocessing.perform_decomp :
-                log.info(f"Instantiating decomp_y_spectrum <{pipe.preprocessing.decomp_y_spectrum._target_}>")
-                decomp: Decomp_y_spectrum = hydra.utils.instantiate(pipe.preprocessing.decomp_y_spectrum)
-                Y_train, Y_test = decomp.decomp_data(Y_train, Y_test)
+        if pipe.perform_decomp :
+                Y_train, Y_test = pipe.decomp_y_spectrum.decomp_data(Y_train, Y_test)
 
         ####
         # Scale Y spectrum data with scaler defined in hydra config file
         ####
-        log.info(f"Instantiating y_spectrum_scaler <{pipe.preprocessing.y_spectrum_scaler._target_}>")
-        y_spectrum_scaler: Y_spectrum_scaler = hydra.utils.instantiate(pipe.preprocessing.y_spectrum_scaler)
-        y_train, y_test = y_spectrum_scaler.scale_data(Y_train, Y_test)
+        y_train, y_test = pipe.y_spectrum_scaler.scale_data(Y_train, Y_test)
 
         ####
         # Shuffle training data
@@ -146,19 +184,19 @@ def Pre_process_data(pipe : PipeConfig):
 
 
 
-def Train_model(pipe : PipeConfig, x_train : np.ndarray, y_train : np.ndarray, x_test : np.ndarray, y_test : np.ndarray, surrogate : SurrogateModel, x_scaler, y_scalers, unit_dictionnary, y_pcas) -> None:
+# def Train_model(pipe : PipeConfig, x_train : np.ndarray, y_train : np.ndarray, x_test : np.ndarray, y_test : np.ndarray, surrogate : SurrogateModel, x_scaler, y_scalers, unit_dictionnary, y_pcas) -> None:
 
-        # Train model
-        surrogate = surrogate(np.shape(y_train)[2], np.shape(x_train)[1])
-        surrogate.dataset_path = pipe.paths.training_env_dataset
-        surrogate.input_variables = pipe.inputs_outputs.envir_variables
-        surrogate.output_variables = pipe.inputs_outputs.neuron_variables
-        surrogate.Frequency_psd(pipe.preprocessing.cut_low_frequency)
+#         # Train model
+#         surrogate = surrogate(np.shape(y_train)[2], np.shape(x_train)[1])
+#         surrogate.dataset_path = pipe.paths.training_env_dataset
+#         surrogate.input_variables = pipe.inputs_outputs.envir_variables
+#         surrogate.output_variables = pipe.inputs_outputs.neuron_variables
+#         surrogate.Frequency_psd(pipe.preprocessing.cut_low_frequency)
 
-        surrogate.set_units_dictionnary(unit_dictionnary)
-        surrogate.set_modelname(pipe.model.name, pipe.model.version)
+#         surrogate.set_units_dictionnary(unit_dictionnary)
+#         surrogate.set_modelname(pipe.model.name, pipe.model.version)
 
-        return surrogate
+#         return surrogate
 
         
 
