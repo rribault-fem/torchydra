@@ -128,11 +128,13 @@ def Pre_process_data(pipe : Preprocessing):
         df = xr.open_dataset(pipe.paths['dataset'])
         df = df.dropna(dim='time', how='any')
 
-        unit_dictionnary = {}
+        pipe.unit_dictionnary = {}
         for var in pipe.inputs_outputs.envir_variables :
-                unit_dictionnary[var] = df[var].attrs['unit']
+                pipe.unit_dictionnary[var] = df[var].attrs['unit']
         for var in pipe.inputs_outputs.neuron_variables :
-                unit_dictionnary[var] = df[var].attrs['unit']
+                pipe.unit_dictionnary[var] = df[var].attrs['unit']
+
+        pipe.Frequency_psd = df['Frequency_psd']
 
         ####
         # Re-arrange direction columns because 0/360 discontinuity do not fit with neural networks.

@@ -39,8 +39,8 @@ class conv1D_surr(nn.Module):
         self.Conv1D3 = nn.Conv1d(128,64,kernel_size=2,stride=2)
 
         stride = 2
-        k_size = 32-(self.spectrum_decomp_length-1)*stride
-        self.Conv1D5 = nn.Conv1d(64,self.spectrum_channel_nb,kernel_size=k_size,stride=stride)
+        k_size = 64-(self.spectrum_decomp_length-1)*stride
+        self.Conv1D4 = nn.Conv1d(64,self.spectrum_channel_nb,kernel_size=k_size,stride=stride)
 
         summary(self, input_size=(self.x_input_size,))     
 
@@ -76,7 +76,6 @@ class conv1D_surr(nn.Module):
         x = nn.functional.relu(self.Conv1D2(x))
         x = nn.functional.relu(self.Conv1D3(x))
         x = nn.functional.relu(self.Conv1D4(x))
-        x = nn.functional.relu(self.Conv1D5(x))
         x= x.permute(0, 2, 1)
         # for i in range(1):
         #     x = nn.functional.relu(self.Conv1D(x))

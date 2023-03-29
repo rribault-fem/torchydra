@@ -57,4 +57,4 @@ class Y_spectrum_scaler :
             y_test[:, :, i] = slc_scaled_test
             self.scalers.append(scaler) # store the decompositions for later use in the inverse transform
            
-            return y_train, y_test
+        return y_train, y_test

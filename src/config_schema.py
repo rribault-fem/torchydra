@@ -7,6 +7,7 @@ from preprocessing.split_transform import Split_transform
 from preprocessing.feature_eng import FeatureEng
 from lightning.pytorch.loggers.tensorboard import TensorBoardLogger
 from typing import Any
+import xarray as xr
 
 @dataclass
 class Inputs_ouputs :
@@ -24,6 +25,8 @@ class Preprocessing :
         decomp_y_spectrum: Decomp_y_spectrum
         y_spectrum_scaler : Y_spectrum_scaler
         cut_low_frequency: float
+        unit_dictionnary:  Optional[Dict] = None
+        Frequency_psd : xr.DataArray = None
 
 
 @dataclass

@@ -8,7 +8,7 @@ from .generic_sensors import status
 #------------------------------------
 # @ USER DEFINED IMPORTS START
 import functools
-import business.export_data.generic_sensors.channel_psd as channel_psd
+import virtual_sensor.generic_sensors.channel_psd as channel_psd
 # @ USER DEFINED IMPORTS END
 #------------------------------------
 
