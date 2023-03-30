@@ -1,0 +1,45 @@
+[2023-03-30 08:45:11,426][train_surrogate][INFO] - Instantiating Preprocessing <config_schema.Preprocessing>
+[2023-03-30 08:45:15,496][train_surrogate][INFO] -  run <get_cos_sin_decomposition> method
+[2023-03-30 08:45:15,497][train_surrogate][INFO] - ###
+[2023-03-30 08:45:15,498][train_surrogate][INFO] - get cos and sin decomposition of the data {'mag10': 'theta10', 'hs': 'dp'}
+[2023-03-30 08:45:15,500][train_surrogate][INFO] - get cos and sin decomposition of the data mag10 and theta10
+[2023-03-30 08:45:15,539][train_surrogate][INFO] - get cos and sin decomposition of the data hs and dp
+[2023-03-30 08:45:15,570][train_surrogate][INFO] - ###
+[2023-03-30 08:45:15,571][train_surrogate][INFO] - Splitting data into training and test sets with method <find_test_set_in_model_validity_domain>
+[2023-03-30 08:45:15,572][train_surrogate][INFO] - #####
+[2023-03-30 08:45:15,572][train_surrogate][INFO] - start guessing valid training / test set with the following environmental bin :
+[2023-03-30 08:45:15,573][train_surrogate][INFO] - {'hs': 2, 'tp': 2, 'dp': 45, 'mag10': 2, 'theta10': 45}
+[2023-03-30 08:45:15,574][train_surrogate][INFO] - looking for 40 test samples in training set, divided in 3 clusters 
+[2023-03-30 08:45:38,886][train_surrogate][INFO] -  Success : test_set found. returning valid dataset with len 39 vs. training set 
+[2023-03-30 08:45:38,889][train_surrogate][INFO] - #####
+[2023-03-30 08:45:39,981][train_surrogate][INFO] - data splitted, now transform to np.array
+[2023-03-30 08:45:40,884][train_surrogate][INFO] - # selected input channels are : ['NeurNode1ALxt_psd', 'NeurNode1ALyt_psd', 'NeurNode1ALzt_psd', 'NeurNode3ALxt_psd', 'NeurNode3ALyt_psd', 'NeurNode3ALzt_psd']
+[2023-03-30 08:45:40,885][train_surrogate][INFO] - # channel training set numpy transformation success. Shape of channel training is (7955, 857, 6) 
+[2023-03-30 08:45:40,892][train_surrogate][INFO] - # channel test set numpy transformation success. Shape of channel test is (39, 857, 6)
+[2023-03-30 08:45:40,907][train_surrogate][INFO] - data transformed to np.array
+[2023-03-30 08:45:40,908][train_surrogate][INFO] - ###
+[2023-03-30 08:45:41,014][train_surrogate][INFO] - ###
+[2023-03-30 08:45:41,015][train_surrogate][INFO] - select environmental values scaler
+[2023-03-30 08:45:41,029][train_surrogate][INFO] - X  data scaled
+[2023-03-30 08:45:41,029][train_surrogate][INFO] - ###
+[2023-03-30 08:45:41,030][train_surrogate][INFO] - decomposition of the y spectrum data
+[2023-03-30 08:45:41,031][train_surrogate][INFO] - Using sklearn decomposition: PCA
+[2023-03-30 08:45:42,413][train_surrogate][INFO] - decomposition of the y spectrum data done
+[2023-03-30 08:45:42,414][train_surrogate][INFO] - ###
+[2023-03-30 08:45:42,441][train_surrogate][INFO] - scale the y spectrum data
+[2023-03-30 08:45:42,442][train_surrogate][INFO] - Using sklearn scaler: MinMaxScaler
+[2023-03-30 08:45:42,517][train_surrogate][INFO] - x_train shape: (7955, 7)
+[2023-03-30 08:45:42,517][train_surrogate][INFO] - y_train shape: (7955, 24, 6)
+[2023-03-30 08:45:42,681][train_surrogate][INFO] - Saving preprocessing
+[2023-03-30 08:45:42,698][train_surrogate][INFO] - Importing conv1D_surr model
+[2023-03-30 08:45:42,946][train_surrogate][INFO] - Instantiating datamodule <data.surrogate.SurrogateDataModule>
+[2023-03-30 08:45:42,964][train_surrogate][INFO] - Instantiating callbacks...
+[2023-03-30 08:45:42,967][utils.instantiatiators][INFO] - Instantiating callback <lightning.pytorch.callbacks.ModelCheckpoint>
+[2023-03-30 08:45:42,979][utils.instantiatiators][INFO] - Instantiating callback <lightning.pytorch.callbacks.EarlyStopping>
+[2023-03-30 08:45:42,989][utils.instantiatiators][INFO] - Instantiating callback <lightning.pytorch.callbacks.RichModelSummary>
+[2023-03-30 08:45:42,993][utils.instantiatiators][INFO] - Instantiating callback <lightning.pytorch.callbacks.RichProgressBar>
+[2023-03-30 08:45:42,998][train_surrogate][INFO] - Instantiating loggers...
+[2023-03-30 08:45:43,001][utils.instantiatiators][INFO] - Instantiating logger <lightning.pytorch.loggers.tensorboard.TensorBoardLogger>
+[2023-03-30 08:45:43,010][train_surrogate][INFO] - Instantiating trainer <lightning.pytorch.trainer.Trainer>
+[2023-03-30 08:45:43,813][train_surrogate][INFO] - Logging hyperparameters!
+[2023-03-30 08:45:53,395][train_surrogate][INFO] - Starting training!
