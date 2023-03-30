@@ -48,3 +48,4 @@ To split a dataset into a test and training data set you can either used the pro
 
 To change the configuration, edit the `config.yaml` file.
 --> To change a model type, edit the `model_type` parameter.
+

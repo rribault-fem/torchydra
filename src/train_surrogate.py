@@ -16,7 +16,7 @@ import utils
 log = logging.getLogger('train_surrogate')
 
 # version_base=1.1 is used to make hydra change the current working directory to the hydra output path
-@hydra.main(config_path="configs", config_name="config.yaml", version_base="1.1")
+@hydra.main(config_path="../configs", config_name="config.yaml", version_base="1.1")
 def main(cfg :  DictConfig):
         """
         This function serves as the main entry point for the script.
