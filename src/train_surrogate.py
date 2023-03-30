@@ -7,7 +7,7 @@ import logging
 from config_schema import Preprocessing
 from model.surrogate_module import SurrogateModule
 from sklearn.utils import shuffle
-from lightning import Callback, LightningDataModule, LightningModule, Trainer
+from lightning import Callback, LightningDataModule, Trainer
 from lightning.pytorch.loggers import Logger
 import torch
 from typing import List
@@ -35,7 +35,7 @@ def main(cfg :  DictConfig):
         Returns:
         None
         """
-
+        # Instantiate preprocessing pipeline
         log.info(f"Instantiating Preprocessing <{cfg.preprocessing._target_}>")
         preprocess: Preprocessing = hydra.utils.instantiate(cfg.preprocessing)
         
@@ -52,6 +52,7 @@ def main(cfg :  DictConfig):
 
         # instanciate model, with parameters depending on dataset.
         log.info(f"Importing {cfg.model_net_component} model")
+        
         # import  model type
         import importlib
         model_net = importlib.import_module("model.components."+cfg.model_net_component)
@@ -134,7 +135,7 @@ def Pre_process_data(pipe : Preprocessing):
         for var in pipe.inputs_outputs.neuron_variables :
                 pipe.unit_dictionnary[var] = df[var].attrs['unit']
 
-        pipe.Frequency_psd = df['Frequency_psd']
+        pipe.Frequency_psd =df['Frequency_psd'].where(df['Frequency_psd']>(pipe.cut_low_frequency), drop=True)
 
         ####
         # Re-arrange direction columns because 0/360 discontinuity do not fit with neural networks.
