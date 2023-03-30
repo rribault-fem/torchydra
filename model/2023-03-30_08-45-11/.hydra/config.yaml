@@ -113,7 +113,7 @@ callbacks:
     max_depth: -1
   rich_progress_bar:
     _target_: lightning.pytorch.callbacks.RichProgressBar
-ml_logger:
+logger:
   tensorboard:
     _target_: lightning.pytorch.loggers.tensorboard.TensorBoardLogger
     save_dir: ./tensorboard_dir/

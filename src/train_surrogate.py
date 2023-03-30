@@ -56,7 +56,7 @@ def main(cfg :  DictConfig):
         # import  model type
         import importlib
         model_net = importlib.import_module("model.components."+cfg.model_net_component)
-        model_net = getattr(model_net, cfg.model_net_component)(x_input_size, spectrum_decomp_length, spectrum_channel_nb)
+        model_net = getattr(model_net, cfg.model_net_component)(x_input_size, spectrum_decomp_length, spectrum_channel_nb, cfg.model_net_parameter['dropout_rate'])
         model : SurrogateModule = hydra.utils.instantiate(cfg.model)
         # Cannot be instanciated in the config file because it depends on the dataset:
         model.net = model_net
@@ -69,7 +69,7 @@ def main(cfg :  DictConfig):
         callbacks: List[Callback] = utils.instantiate_callbacks(cfg.get("callbacks"))
 
         log.info("Instantiating loggers...")
-        logger: List[Logger] = utils.instantiate_loggers(cfg.get("ml_logger"))
+        logger: List[Logger] = utils.instantiate_loggers(cfg.get("logger"))
         
         log.info(f"Instantiating trainer <{cfg.trainer._target_}>")
         trainer: Trainer = hydra.utils.instantiate(cfg.trainer, callbacks=callbacks, logger=logger)

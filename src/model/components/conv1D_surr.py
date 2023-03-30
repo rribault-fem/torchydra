@@ -14,11 +14,12 @@ class conv1D_surr(nn.Module):
     Returns:
         torch.Tensor: A tensor representing the output of the convolutional neural network.
     """
-    def __init__(self,  x_input_size: int, spectrum_decomp_length:int, spectrum_channel_nb: int):
+    def __init__(self,  x_input_size: int, spectrum_decomp_length:int, spectrum_channel_nb: int, dropout_rate:float):
         super().__init__()
         self.spectrum_channel_nb = spectrum_channel_nb
         self.x_input_size = x_input_size
         self.spectrum_decomp_length = spectrum_decomp_length
+        self.dropout = nn.Dropout(p=dropout_rate)
         # Define the layers of the neural network
         self.Dense1 = nn.Linear(self.x_input_size, 128)
         self.Dense2 = nn.Linear(128, 64)
@@ -57,6 +58,7 @@ class conv1D_surr(nn.Module):
         # Encode the input using dense layer
         x = nn.functional.relu(self.Dense1(x))
         x = nn.functional.relu(self.Dense2(x))
+        x = self.dropout(x)
         x = nn.functional.relu(self.Dense3(x))
         x = nn.functional.relu(self.Dense4(x))
 
@@ -67,10 +69,12 @@ class conv1D_surr(nn.Module):
         # first use wide kernel size to learn the global structure and interraction between channels
         x = nn.functional.relu(self.Conv1DT1(x))
         x = nn.functional.relu(self.Conv1DT2(x))
+        x = self.dropout(x)
         x = nn.functional.relu(self.Conv1DT3(x))
         # then use narrow kernel size to learn the local structure
         x = nn.functional.relu(self.Conv1DT4(x))
         x = nn.functional.relu(self.Conv1DT5(x))
+        x = self.dropout(x)
         # finally filter the output to get the desired output shape
         x = nn.functional.relu(self.Conv1D1(x))
         x = nn.functional.relu(self.Conv1D2(x))

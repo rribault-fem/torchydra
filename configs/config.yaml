@@ -11,12 +11,15 @@ defaults:
   - model : surrogate_module.yaml
   - trainer: cpu.yaml
   - callbacks : default.yaml
-  - ml_logger: tensorboard.yaml
+  - logger: tensorboard.yaml
   - data : surrogate.yaml
 
 task_name: "train_surrogate"        # task name, determines output directory path
 
 model_net_component : conv1D_surr   # Name of the model to use. the .py file and the class shall have the same name and be located in src\model\components
+
+model_net_parameter : 
+  dropout_rate : 0.5
 
 # tags to help you identify your experiments
 # you can overwrite this in experiment configs

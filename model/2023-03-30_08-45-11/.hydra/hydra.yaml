@@ -143,7 +143,7 @@ hydra:
     output_dir: C:\Users\romain.ribault\Documents\GitHub\Deep_learning_model_training\outputs\train_surrogate\runs\2023-03-30_08-45-11
     choices:
       data: surrogate.yaml
-      ml_logger: tensorboard.yaml
+      logger: tensorboard.yaml
       callbacks: default.yaml
       trainer: cpu.yaml
       model: surrogate_module.yaml
