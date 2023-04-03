@@ -41,6 +41,7 @@ class SurrogateDataModule(LightningDataModule):
         batch_size: int = 64,
         num_workers: int = 0,
         pin_memory: bool = False,
+        **kwargs
     ):
         super().__init__()
 
@@ -53,9 +54,19 @@ class SurrogateDataModule(LightningDataModule):
             [transforms.ToTensor()]
         )
 
-        self.data_train: Optional[Dataset] = None
-        self.data_val: Optional[Dataset] = None
-        self.data_test: Optional[Dataset] = None
+        required_kwargs_list = ['x_train', 'y_train', 'x_test', 'y_test']
+
+        for kwarg in required_kwargs_list:
+            if kwarg not in kwargs:
+                raise ValueError(f"Missing required kwarg: {kwarg}")       
+
+        x_train_tensor = torch.from_numpy(kwargs['x_train']).float()
+        y_train_tensor = torch.from_numpy(kwargs['y_train']).float()
+        x_test_tensor = torch.from_numpy(kwargs['x_test']).float()
+        y_test_tensor = torch.from_numpy(kwargs['y_test']).float()
+        self.data_train = TensorDataset(x_train_tensor, y_train_tensor)
+        self.data_val = TensorDataset(x_test_tensor, y_test_tensor)
+        self.data_test = ConcatDataset(datasets=[self.data_train, self.data_val])
 
 
     def setup(self,

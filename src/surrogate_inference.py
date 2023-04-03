@@ -16,7 +16,7 @@ DATE = "2022-12-01"
 envir_dataset_path = os.path.join(SAVE_PATH, DATE.replace('-','\\'), "Environment", "Zefyros", "DataSample_Zefyros.nc")
 envir_dataset = xr.open_dataset(envir_dataset_path)
 
-experiment_path = r"C:\Users\romain.ribault\Documents\GitHub\Deep_learning_model_training\outputs\train_surrogate\runs\2023-03-30_08-45-11"
+experiment_path = r"C:\Users\romain.ribault\Documents\GitHub\Deep_learning_model_training\outputs\train_surrogate\runs\2023-03-30_12-09-49"
 
 # load preprocessing pipeline
 preprocess_path = os.path.join(experiment_path, "preprocessing.pkl")
@@ -25,7 +25,7 @@ with open(preprocess_path, 'rb') as f:
 
 # load model
 model_path = os.path.join(experiment_path, r"checkpoints\last.ckpt")
-net = conv1D_surr.conv1D_surr(7, 24, 6)
+net = conv1D_surr.conv1D_surr(7, 24, 6, 0.5)
 model : SurrogateModule = SurrogateModule.load_from_checkpoint(model_path, net=net)
 
 # Load environment inputs

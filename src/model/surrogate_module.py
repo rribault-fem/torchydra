@@ -26,6 +26,7 @@ class SurrogateModule(LightningModule):
         optimizer: torch.optim.Optimizer,
         scheduler: torch.optim.lr_scheduler,
         net: torch.nn.Module = None,
+        criterion = torch.nn.MSELoss(),
     ):
         super().__init__()
 
@@ -35,8 +36,7 @@ class SurrogateModule(LightningModule):
 
         self.net = net
         
-        # loss function
-        self.criterion = torch.nn.MSELoss()
+        self.criterion = criterion
 
         # # metric objects for calculating and averaging accuracy across batches
         self.train_mse = MeanSquaredError()

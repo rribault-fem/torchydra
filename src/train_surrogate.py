@@ -12,11 +12,15 @@ from lightning.pytorch.loggers import Logger
 import torch
 from typing import List
 import utils
+from utils.load_env_file import load_env_file
+import os
 
 log = logging.getLogger('train_surrogate')
+print(os.getcwd())
+load_env_file(".env.yaml")
 
 # version_base=1.1 is used to make hydra change the current working directory to the hydra output path
-@hydra.main(config_path="../configs", config_name="config.yaml", version_base="1.1")
+@hydra.main(config_path="../configs", config_name="train.yaml", version_base="1.1")
 def main(cfg :  DictConfig):
         """
         This function serves as the main entry point for the script.
@@ -50,20 +54,30 @@ def main(cfg :  DictConfig):
 
         x_input_size, spectrum_decomp_length, spectrum_channel_nb = np.shape(x_train)[1], np.shape(y_train)[1], np.shape(y_train)[2]
 
-        # instanciate model, with parameters depending on dataset.
-        log.info(f"Importing {cfg.model_net_component} model")
+        # instanciate DataModule. Parameters depending on dataset are passed as args. 
+        kwargs = {
+                "x_train" : x_train,
+                "y_train" : y_train,
+                "x_test" : x_test,
+                "y_test" : y_test}
         
-        # import  model type
-        import importlib
-        model_net = importlib.import_module("model.components."+cfg.model_net_component)
-        model_net = getattr(model_net, cfg.model_net_component)(x_input_size, spectrum_decomp_length, spectrum_channel_nb, cfg.model_net_parameter['dropout_rate'])
-        model : SurrogateModule = hydra.utils.instantiate(cfg.model)
-        # Cannot be instanciated in the config file because it depends on the dataset:
-        model.net = model_net
-
         log.info(f"Instantiating datamodule <{cfg.data._target_}>")
-        datamodule: LightningDataModule = hydra.utils.instantiate(cfg.data)
-        datamodule.setup(x_train = x_train, y_train= y_train, x_test=x_test, y_test=y_test)
+        datamodule: LightningDataModule = hydra.utils.instantiate(cfg.data, **kwargs)
+
+        # instanciate model. Parameters depending on dataset are passed as kwargs.
+        kwargs = {
+                "x_input_size" : x_input_size,
+                "spectrum_decomp_length" : spectrum_decomp_length,
+                "spectrum_channel_nb" : spectrum_channel_nb}
+        
+        log.info(f"Importing model net {cfg.model_net._target_}")
+        # can be passed as *args because all arguments are defined above, no argument defined in .yaml config file.
+        model_net : torch.nn.Module = hydra.utils.instantiate(cfg.model_net, **kwargs)
+        
+        log.info(f"Importing model  {cfg.model._target_}")
+        model : SurrogateModule = hydra.utils.instantiate(cfg.model)
+        # model.net cannot be instanciated in the config file because it depends on the dataset:
+        model.net = model_net
         
         log.info("Instantiating callbacks...")
         callbacks: List[Callback] = utils.instantiate_callbacks(cfg.get("callbacks"))

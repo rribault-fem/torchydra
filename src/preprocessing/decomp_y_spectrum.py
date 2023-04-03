@@ -38,9 +38,9 @@ class Decomp_y_spectrum :
             # Select user defined decomposition from hydra config file
             if hasattr(skldecomp, self.decomp_option):
                 decomp = getattr(skldecomp, self.decomp_option)(n_components= self.decomp_n_component)
-                
-
+            
                 slc_decomp_train = decomp.fit_transform(slc_train)
+                log.info(f"Explained variance ratio for channel {i}: {np.sum(decomp.explained_variance_ratio_)}")
                 slc_decomp_test = decomp.transform(slc_test)
             else:
                 raise ValueError(f"No such method in skleanr decomposition: {self.decomp_option}")

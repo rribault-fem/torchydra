@@ -11,6 +11,18 @@ neuron_variables:
   - NeurNode1ALxt_psd
   - NeurNode1ALyt_psd
   - NeurNode1ALzt_psd
+  - NeurNode2ALxt_psd
+  - NeurNode2ALyt_psd
+  - NeurNode2ALzt_psd
   - NeurNode3ALxt_psd
   - NeurNode3ALyt_psd
   - NeurNode3ALzt_psd
+  - NeurNode4ALxt_psd
+  - NeurNode4ALyt_psd
+  - NeurNode4ALzt_psd
+  - NeurNode5ALxt_psd
+  - NeurNode5ALyt_psd
+  - NeurNode5ALzt_psd
+  - NeurNode6ALxt_psd
+  - NeurNode6ALyt_psd
+  - NeurNode6ALzt_psd

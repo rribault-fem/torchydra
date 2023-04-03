@@ -14,12 +14,16 @@ defaults:
   - logger: tensorboard.yaml
   - data : surrogate.yaml
 
-task_name: "train_surrogate"        # task name, determines output directory path
-
-model_net_component : conv1D_surr   # Name of the model to use. the .py file and the class shall have the same name and be located in src\model\components
-
-model_net_parameter : 
+model_net :  
+  _target_ : model.components.conv1D_surr.conv1D_surr
   dropout_rate : 0.5
+  activation : 
+    _target_ : torch.nn.ReLU
+  first_dense_layer_out_features : 128
+  num_conv1DT_layers : 5
+  
+
+task_name: "train_surrogate"        # task name, determines output directory path
 
 # tags to help you identify your experiments
 # you can overwrite this in experiment configs

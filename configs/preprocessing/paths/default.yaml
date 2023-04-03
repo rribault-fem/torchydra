@@ -1,4 +1,4 @@
-dataset : C:\Users\romain.ribault\Documents\Dionysos\echanges_Morphosense\Windeurope_dataset\reference_dataset_Zefyros_windeurope.nc
+dataset: ${oc.env:DATASET_PATH}
 training_env_dataset: ./envir_training_db.nc
 tensorboard_dir: ./tensorboard/
 
