@@ -112,7 +112,7 @@ def main(cfg :  DictConfig):
         train_metrics = trainer.callback_metrics
 
 
-        return
+        return train_metrics['train/loss']
 
         Train_model(pipe, surrogate, x_train, y_train, x_test, y_test)
 

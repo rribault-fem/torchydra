@@ -16,9 +16,19 @@ defaults:
 
 tags: ["surrogate", "conv1D"]
 
+preprocessing:
+  split_transform:
+    test_nb: 140
+
+callbacks:
+  early_stopping:
+    monitor: "train/loss"
+    patience: 100
+    mode: "min"
+
 trainer:
-  min_epochs: 5
-  max_epochs: 5
+  min_epochs: 3
+  max_epochs: 13
   gradient_clip_val: 0.5
 
 model:

@@ -15,7 +15,7 @@ feature_eng :
     hs: dp
 split_transform : 
   _target_ : preprocessing.split_transform.Split_transform 
-  test_nb : 40                                          # Number of test samples and clusters
+  test_nb : 60                                          # Number of test samples and clusters
   cluster: 3                                            # Number of clusters                          
   split_method : find_test_set_in_model_validity_domain # Name of the method to use for the split (cf.py file) : current option available
   envir_bin :                                           # Environment variables used to pre-define the validity domain of the model
