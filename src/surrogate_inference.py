@@ -2,7 +2,7 @@ import xarray as xr
 import os
 import pickle
 import numpy as np
-import virtual_sensor.Neuron as Neuron
+import virtual_sensor.export_data.Neuron as Neuron
 from config_schema import Preprocessing
 from scipy.stats import qmc
 from model.surrogate_module import SurrogateModule
@@ -16,7 +16,7 @@ DATE = "2022-12-01"
 envir_dataset_path = os.path.join(SAVE_PATH, DATE.replace('-','\\'), "Environment", "Zefyros", "DataSample_Zefyros.nc")
 envir_dataset = xr.open_dataset(envir_dataset_path)
 
-experiment_path = r"C:\Users\romain.ribault\Documents\GitHub\Deep_learning_model_training\outputs\train_surrogate\runs\2023-03-30_12-09-49"
+experiment_path = r"C:\Users\romain.ribault\Documents\GitHub\Deep_learning_model_training\outputs\train_surrogate\runs\2023-04-05_11_13_16"
 
 # load preprocessing pipeline
 preprocess_path = os.path.join(experiment_path, "preprocessing.pkl")
@@ -25,7 +25,15 @@ with open(preprocess_path, 'rb') as f:
 
 # load model
 model_path = os.path.join(experiment_path, r"checkpoints\last.ckpt")
-net = conv1D_surr.conv1D_surr(7, 24, 6, 0.5)
+
+# load a dummy model to load the checkpoint
+kwargs = {'x_input_size': 7, 'spectrum_decomp_length': 24, 'spectrum_channel_nb': 18}
+net = conv1D_surr.conv1D_surr(first_dense_layer_out_features=2**7, 
+                  latent_space_dim=2**4, 
+                  conv1DT_latent_dim =2**9,
+                  droupout_rate= 0.5,
+                   **kwargs)
+
 model : SurrogateModule = SurrogateModule.load_from_checkpoint(model_path, net=net)
 
 # Load environment inputs
