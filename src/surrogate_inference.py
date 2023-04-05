@@ -63,19 +63,37 @@ y_hat = y_hat.detach().numpy()
 
 # unscale y_hat
 Yscalers = preprocess.y_spectrum_scaler.scalers
-PCAs = preprocess.decomp_y_spectrum.decomps
 
-# Prepare np arrays to receive inference results
-Y_hat_inter = np.zeros_like(y_hat)
-batch_size = np.shape(PCAs[0].inverse_transform(y_hat[:,:,0]))[0]
-spectrum_length = np.shape(PCAs[0].inverse_transform(y_hat[:,:,0]))[1]
-channel_nb = len(Yscalers)
-Y_hat = np.zeros((batch_size, spectrum_length, channel_nb ))
-i=0
-for pca, scaler in zip(PCAs, Yscalers) :
-    Y_hat_inter[:,:,i] =  scaler.inverse_transform(y_hat[:,:,i])
-    Y_hat[:,:,i] = pca.inverse_transform(Y_hat_inter[:,:,i])
-    i+=1
+if preprocess.perform_decomp :
+    PCAs = preprocess.decomp_y_spectrum.decomps
+
+    # Prepare np arrays to receive inference results
+    Y_hat_inter = np.zeros_like(y_hat)
+    batch_size = np.shape(PCAs[0].inverse_transform(y_hat[:,:,0]))[0]
+    spectrum_length = np.shape(PCAs[0].inverse_transform(y_hat[:,:,0]))[1]
+    channel_nb = len(Yscalers)
+    Y_hat = np.zeros((batch_size, spectrum_length, channel_nb ))
+
+
+    i=0
+    for pca, scaler in zip(PCAs, Yscalers) :
+        Y_hat_inter[:,:,i] =  scaler.inverse_transform(y_hat[:,:,i])
+        Y_hat[:,:,i] = pca.inverse_transform(Y_hat_inter[:,:,i])
+        i+=1
+
+else : 
+    # Prepare np arrays to receive inference results
+    Y_hat = np.zeros_like(y_hat)
+    batch_size = np.shape(Yscalers[0].inverse_transform(y_hat[:,:,0]))[0]
+    spectrum_length = np.shape(Yscalers[0].inverse_transform(y_hat[:,:,0]))[1]
+    channel_nb = len(Yscalers)
+    Y_hat = np.zeros((batch_size, spectrum_length, channel_nb ))
+
+
+    i=0
+    for scaler in  Yscalers :
+        Y_hat[:,:,i] =  scaler.inverse_transform(y_hat[:,:,i])
+        i+=1
 
 # perform uncertainty propagation and calculate 95% confidence interval
 # define input variables uncertainty :
@@ -115,13 +133,23 @@ Y_hat_max_env_int= np.zeros_like(y_hat_max_env)
 Y_hat_min_env_int= np.zeros_like(y_hat_min_env)
 Y_hat_max_env = np.zeros((batch_size, spectrum_length, channel_nb ))
 Y_hat_min_env = np.zeros((batch_size, spectrum_length, channel_nb ))
-i=0
-for pca, scaler in zip(PCAs, Yscalers):
-    Y_hat_max_env_int[:,:,i] =  scaler.inverse_transform(y_hat_max_env[:,:,i])
-    Y_hat_max_env[:,:,i] =  pca.inverse_transform(Y_hat_max_env_int[:,:,i])
-    Y_hat_min_env_int[:,:,i] =  scaler.inverse_transform(y_hat_min_env[:,:,i])
-    Y_hat_min_env[:,:,i] = pca.inverse_transform(Y_hat_min_env_int[:,:,i])
-    i+=1
+
+if preprocess.perform_decomp :
+    i=0
+    for pca, scaler in zip(PCAs, Yscalers):
+        Y_hat_max_env_int[:,:,i] =  scaler.inverse_transform(y_hat_max_env[:,:,i])
+        Y_hat_max_env[:,:,i] =  pca.inverse_transform(Y_hat_max_env_int[:,:,i])
+        Y_hat_min_env_int[:,:,i] =  scaler.inverse_transform(y_hat_min_env[:,:,i])
+        Y_hat_min_env[:,:,i] = pca.inverse_transform(Y_hat_min_env_int[:,:,i])
+        i+=1
+else :
+    i=0
+    for scaler in Yscalers:
+        Y_hat_max_env[:,:,i] =  scaler.inverse_transform(y_hat_max_env[:,:,i])
+        Y_hat_min_env[:,:,i] =  scaler.inverse_transform(y_hat_min_env[:,:,i])
+        i+=1
+
+
 
 # Allocate to Neuron object
 Y_channel_list = preprocess.inputs_outputs.neuron_variables
