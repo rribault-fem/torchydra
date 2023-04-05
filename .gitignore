@@ -3,6 +3,9 @@
 *.tar
 *.tar.gz
 
+# local path configs
+.env.yaml
+
 outputs/
 multirun/
 

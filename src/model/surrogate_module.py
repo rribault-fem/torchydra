@@ -96,7 +96,7 @@ class SurrogateModule(LightningModule):
         self.val_mse_best(acc)  # update best so far val acc
         # log `val_mse_best` as a value through `.compute()` method, instead of as a metric object
         # otherwise metric would be reset by lightning after each epoch
-        self.log("val/acc_best", self.val_mse_best.compute(), prog_bar=True)
+        self.log("val/mse_best", self.val_mse_best.compute(), prog_bar=True)
 
     def test_step(self, batch: Any, batch_idx: int):
         loss, preds, targets = self.model_step(batch)
