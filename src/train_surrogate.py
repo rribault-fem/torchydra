@@ -16,8 +16,6 @@ from utils.load_env_file import load_env_file
 import os
 
 log = logging.getLogger('train_surrogate')
-print(os.getcwd())
-load_env_file(".env.yaml")
 
 # version_base=1.1 is used to make hydra change the current working directory to the hydra output path
 @hydra.main(config_path="../configs", config_name="train.yaml", version_base="1.1")
@@ -39,6 +37,7 @@ def main(cfg :  DictConfig):
         Returns:
         None
         """
+        load_env_file(f"{hydra.utils.get_original_cwd()}/.env.yaml")
         # Instantiate preprocessing pipeline
         log.info(f"Instantiating Preprocessing <{cfg.preprocessing._target_}>")
         preprocess: Preprocessing = hydra.utils.instantiate(cfg.preprocessing)
