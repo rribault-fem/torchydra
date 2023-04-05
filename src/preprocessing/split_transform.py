@@ -5,6 +5,7 @@ import numpy as np
 import xarray as xr
 from typing import List, Optional, Tuple
 import random
+import math
 
 @dataclass
 class Split_transform :
@@ -29,6 +30,7 @@ class Split_transform :
     cluster: int
     split_method : str
     envir_bin : dict
+    cut_low_frequency : float
 
     def process_data(self, df : xr.Dataset, X_channel_list : List[str], Y_channel_list : List[str], df_train_set_envir_filename: str ) -> Tuple[np.array, np.array]:
         """
@@ -70,8 +72,7 @@ class Split_transform :
                                                  df_test_set: xr.Dataset,
                                                  X_channel_list:List[str], 
                                                  Y_channel_list = List[str], 
-                                                 df_train_set_envir = None, 
-                                                 cut_low_frequency=1/35) :
+                                                 df_train_set_envir = None) :
 
         """
         This method transforms training and testing sets from xarray Datasets to numpy arrays.
@@ -109,8 +110,12 @@ class Split_transform :
         log.info('# channel test set numpy transformation success. Shape of channel test is {}'.format(np.shape(Y_numpy_channels_test_set)))
 
         # Cut off frequency to not try to predict noise
-        cut_low_freq_arg = np.argwhere(df_training_set.Frequency_psd.values>(cut_low_frequency))[0][0]
+        cut_low_freq_arg = np.argwhere(df_training_set.Frequency_psd.values>(self.cut_low_frequency))[0][0]
+        if math.log(cut_low_freq_arg,2) - int(math.log(cut_low_freq_arg,2)) != 0 :
+            cut_low_freq_arg = 512
         #cut_high_freq = np.argwhere(df.Frequency_psd.values<4)[0][0]
+        
+       
         Y_numpy_channels_training_set = Y_numpy_channels_training_set[:,cut_low_freq_arg:,:]
         Y_numpy_channels_test_set = Y_numpy_channels_test_set[:, cut_low_freq_arg :  ,:]
 

@@ -15,6 +15,7 @@ import pickle
 import os
 from sklearn.decomposition import PCA
 import logging
+import math
  
 # file = r'X:\MONAMOOR\Zefyros_simulations_netcdf_V3_22-11-25.nc'
 # df = xr.open_dataset(file)
@@ -292,9 +293,12 @@ def get_X_Y_train_test_from_xr_dataset(df, envir_bin, X_channel_list = ['tp', 'h
     # Cut off frequency to not try to predict noise
     cut_low_freq_arg = np.argwhere(df.Frequency_psd.values>(cut_low_frequency))[0][0]
     #cut_high_freq = np.argwhere(df.Frequency_psd.values<4)[0][0]
+    if math.log(cut_low_freq_arg,2) - int(math.log(cut_low_freq_arg,2)) != 0 :
+        cut_low_freq_arg = 512
     Y_numpy_channels_training_set = Y_numpy_channels_training_set[:,cut_low_freq_arg:,:]
     Y_numpy_channels_test_set = Y_numpy_channels_test_set[:, cut_low_freq_arg :  ,:]
 
+        
     #envir_variables = ['cur_dir', 'cur', 'dp', 'tp', 'hs', 'mag10', 'theta10', 'gust10']
 
     X_numpy_channels_training_set = get_numpy_input_envir_set(df_training_set, X_channel_list)
@@ -309,7 +313,7 @@ def get_X_Y_train_test_from_xr_dataset(df, envir_bin, X_channel_list = ['tp', 'h
     df_training_set.to_netcdf(os.path.join(df_train_set_envir))
 
  
-    return X_numpy_channels_training_set, X_numpy_channels_test_set, Y_numpy_channels_training_set, Y_numpy_channels_test_set
+    return X_numpy_channels_training_set, X_numpy_channels_test_set, Y_numpy_channels_training_set, Y_numpy_channels_test_set, cut_low_freq_arg
 
 def Scale_Xscalar_data(X_numpy_channels_training_set, X_numpy_channels_test_set, file_names= ['x_train_scaled', 'x_val_scaled'], folder = None) :
     log = logging.getLogger('train_surrogate')

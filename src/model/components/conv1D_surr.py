@@ -86,14 +86,6 @@ class conv1D_surr(nn.Module):
         setattr(self, f"Conv1D{i+1}", conv1D_layer)
 
 
-        # self.Conv1D1 = nn.Conv1d(512,256,kernel_size=2,stride=2)
-        # self.Conv1D2 = nn.Conv1d(256,128,kernel_size=2,stride=2)
-        # self.Conv1D3 = nn.Conv1d(128,64,kernel_size=2,stride=2)
-
-        # stride = 2
-        # k_size = 64-(self.spectrum_decomp_length-1)*stride
-        # self.Conv1D4 = nn.Conv1d(64,self.spectrum_channel_nb,kernel_size=k_size,stride=stride)
-
         summary(self, input_size=(self.x_input_size,))     
 
     def forward(self, x):
@@ -160,7 +152,7 @@ if __name__ == '__main__':
     # Test the model
     kwargs = {
         "x_input_size" : 7,
-        "spectrum_decomp_length" : 24,
+        "spectrum_decomp_length" : 526,
         "spectrum_channel_nb" : 6}
 
 
