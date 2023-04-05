@@ -74,7 +74,7 @@ class SurrogateModule(LightningModule):
         self.train_loss(loss)
         self.train_mse(preds, targets)
         self.log("train/loss", self.train_loss, on_step=False, on_epoch=True, prog_bar=True)
-        self.log("train/acc", self.train_mse, on_step=False, on_epoch=True, prog_bar=True)
+        self.log("train/mse", self.train_mse, on_step=False, on_epoch=True, prog_bar=True)
 
         # return loss or backpropagation will fail
         return loss
@@ -89,14 +89,14 @@ class SurrogateModule(LightningModule):
         self.val_loss(loss)
         self.val_mse(preds, targets)
         self.log("val/loss", self.val_loss, on_step=False, on_epoch=True, prog_bar=True)
-        self.log("val/acc", self.val_mse, on_step=False, on_epoch=True, prog_bar=True)
+        self.log("val/mse", self.val_mse, on_step=False, on_epoch=True, prog_bar=True)
 
     def on_validation_epoch_end(self):
         acc = self.val_mse.compute()  # get current val acc
         self.val_mse_best(acc)  # update best so far val acc
         # log `val_mse_best` as a value through `.compute()` method, instead of as a metric object
         # otherwise metric would be reset by lightning after each epoch
-        self.log("val/acc_best", self.val_mse_best.compute(), prog_bar=True)
+        self.log("val/mse_best", self.val_mse_best.compute(), prog_bar=True)
 
     def test_step(self, batch: Any, batch_idx: int):
         loss, preds, targets = self.model_step(batch)
