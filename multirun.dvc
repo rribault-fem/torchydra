@@ -1,0 +1,5 @@
+outs:
+- md5: 43272a3ebdfb8fbf49cd5d522517b639.dir
+  size: 3418886384
+  nfiles: 301
+  path: multirun
