@@ -88,7 +88,7 @@ def main(cfg :  DictConfig):
         log.info(f"Instantiating trainer <{cfg.trainer._target_}>")
         trainer: Trainer = hydra.utils.instantiate(cfg.trainer, callbacks=callbacks, logger=logger)
 
-        torch.set_float32_matmul_precision('medium' | 'high')
+        torch.set_float32_matmul_precision('medium')
         
         object_dict = {
                 "cfg": cfg,
@@ -154,8 +154,8 @@ def Pre_process_data(pipe : Preprocessing):
         if not pipe.perform_decomp :
                 cut_low_freq_arg = np.argwhere(df.Frequency_psd.values>(pipe.split_transform.cut_low_frequency))[0][0]
                 if math.log(cut_low_freq_arg,2) - int(math.log(cut_low_freq_arg,2)) != 0 :
-                        cut_low_freq_arg = 512
-                        pipe.split_transform.cut_low_frequency =float(df["Frequency_psd"].isel(Frequency_psd= cut_low_freq_arg))
+                        cut_low_freq_arg = 345
+                        pipe.split_transform.cut_low_frequency =float(df["Frequency_psd"].isel(Frequency_psd= cut_low_freq_arg-1))
      
         pipe.Frequency_psd =df['Frequency_psd'].where(df['Frequency_psd']>(pipe.split_transform.cut_low_frequency), drop=True)
 

@@ -15,8 +15,8 @@ model_checkpoint:
 
 early_stopping:
   monitor: "train/loss"
-  patience: 100
-  mode: "max"
+  patience: 5
+  mode: "min"
 
 model_summary:
   max_depth: -1

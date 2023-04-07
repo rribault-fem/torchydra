@@ -152,10 +152,8 @@ if __name__ == '__main__':
     # Test the model
     kwargs = {
         "x_input_size" : 7,
-        "spectrum_decomp_length" : 526,
-        "spectrum_channel_nb" : 6}
-
-
+        "spectrum_decomp_length" : 512,
+        "spectrum_channel_nb" : 18}
 
     model = conv1D_surr(first_dense_layer_out_features =2**7, 
     latent_space_dim =2**4,

@@ -9,14 +9,15 @@ from model.surrogate_module import SurrogateModule
 from model.components import conv1D_surr
 import torch
 from typing import List
+import yaml
 
-SAVE_PATH = r"C:\Users\romain.ribault\OneDrive - FRANCE ENERGIES MARINES\DIONYSOS\08_DATA\Dataflow"
+SAVE_PATH = r"D:\PreProd\storage"
 DATE = "2022-12-01"
 
 envir_dataset_path = os.path.join(SAVE_PATH, DATE.replace('-','\\'), "Environment", "Zefyros", "DataSample_Zefyros.nc")
 envir_dataset = xr.open_dataset(envir_dataset_path)
 
-experiment_path = r"C:\Users\romain.ribault\Documents\GitHub\Deep_learning_model_training\outputs\train_surrogate\runs\2023-04-05_11_13_16"
+experiment_path = r"C:\Users\zefyros_calc\Documents\deep_learning_training\Deep_learning_model_training\multirun\2023-04-05\15-48-14\29"
 
 # load preprocessing pipeline
 preprocess_path = os.path.join(experiment_path, "preprocessing.pkl")
@@ -25,13 +26,17 @@ with open(preprocess_path, 'rb') as f:
 
 # load model
 model_path = os.path.join(experiment_path, r"checkpoints\last.ckpt")
+hydra_config_path = os.path.join(experiment_path, r'.hydra/config.yaml' )
+
+with open(hydra_config_path, 'r') as f:
+    hydra_config = yaml.safe_load(f)
 
 # load a dummy model to load the checkpoint
 kwargs = {'x_input_size': 7, 'spectrum_decomp_length': 24, 'spectrum_channel_nb': 18}
-net = conv1D_surr.conv1D_surr(first_dense_layer_out_features=2**7, 
-                  latent_space_dim=2**4, 
-                  conv1DT_latent_dim =2**9,
-                  droupout_rate= 0.5,
+net = conv1D_surr.conv1D_surr(first_dense_layer_out_features= hydra_config['model_net']['first_dense_layer_out_features'], 
+                  latent_space_dim=hydra_config['model_net']['latent_space_dim'], 
+                  conv1DT_latent_dim =hydra_config['model_net']['conv1DT_latent_dim'],
+                  droupout_rate= hydra_config['model_net']['dropout_rate'],
                    **kwargs)
 
 model : SurrogateModule = SurrogateModule.load_from_checkpoint(model_path, net=net)
@@ -55,11 +60,21 @@ X_env = preprocess.split_transform.get_numpy_input_envir_set(df, X_channel_list)
 # with open(model_object.pca_path, 'rb') as f:
 #     PCAs = pickle.load(f)
 x_env = preprocess.envir_scaler.scaler.transform(X_env)
-x_env = torch.from_numpy(x_env).float()
+
 # predict nominal spectrum thanks to the surrogate model
-model.eval()
-y_hat = model(x_env)
-y_hat = y_hat.detach().numpy()
+def model_predict(x_env: np.array, model :SurrogateModule ) -> np.ndarray :
+    
+    x_env = torch.from_numpy(x_env).float()
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    x_env = x_env.to(device)
+    model = model.to(device)
+    model.eval()
+    y_hat = model(x_env)
+    y_hat = y_hat.detach().cpu().numpy()
+    
+    return y_hat
+
+y_hat = model_predict(x_env, model)
 
 # unscale y_hat
 Yscalers = preprocess.y_spectrum_scaler.scalers
@@ -115,12 +130,10 @@ for env_sample in X_env :
         sample[:,i] = (sample[:,i] - 0.5 ) * (1 + env_uncertainty[key]) * env_sample[preprocess.inputs_outputs.envir_variables.index(key)]
     # scale the input sample
     x_env_sample = preprocess.envir_scaler.scaler.transform(sample)
-    x_env_sample = torch.from_numpy(x_env_sample).float()
+    
+    y_sample = model_predict(x_env, model)
+    
 
-    # predict the several spectrum for each sample
-    y_sample = model(x_env_sample).detach().numpy()
-    
-    
     # take the 99% percentice of the sample (none, 512, 6) on axis 1
     y_hat_max_env.append(np.percentile(y_sample, 99.9, axis=0))
     y_hat_min_env.append(np.percentile(y_sample, 0.1, axis=0))
@@ -170,7 +183,7 @@ for channel in Y_channel_list:
 
 #neuron.Frequency_psd = preprocess.Frequency_psd
 # Temporary fix for the frequency vector :
-neuron.Frequency_psd = preprocess.Frequency_psd.where(preprocess.Frequency_psd>(preprocess.cut_low_frequency), drop=True).values
+neuron.Frequency_psd = preprocess.Frequency_psd.where(preprocess.Frequency_psd>(preprocess.split_transform.cut_low_frequency), drop=True).values
 
 neuron.time_psd = envir_dataset.time.values
 # Save netcdf file

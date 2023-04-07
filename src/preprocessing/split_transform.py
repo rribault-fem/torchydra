@@ -111,8 +111,6 @@ class Split_transform :
 
         # Cut off frequency to not try to predict noise
         cut_low_freq_arg = np.argwhere(df_training_set.Frequency_psd.values>(self.cut_low_frequency))[0][0]
-        if math.log(cut_low_freq_arg,2) - int(math.log(cut_low_freq_arg,2)) != 0 :
-            cut_low_freq_arg = 512
         #cut_high_freq = np.argwhere(df.Frequency_psd.values<4)[0][0]
         
        
