@@ -1,0 +1,5 @@
+outs:
+- md5: 8ad03d2e3a4cd0a98c310df96200f7c2.dir
+  size: 588009157
+  nfiles: 340
+  path: train_surrogate
