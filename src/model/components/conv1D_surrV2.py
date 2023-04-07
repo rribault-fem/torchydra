@@ -92,6 +92,8 @@ class conv1d_surrv2(nn.Module):
             x = self.activation(getattr(self, f"conv1d{i}")(x))
             if hasattr(self, "dropout") and i<self.num_conv1d_layers-2 :
                 x = self.dropout(x)
+        # flip channel and time axis
+        x = x.permute(0,2,1)
 
         return x
 
