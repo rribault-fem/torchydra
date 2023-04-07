@@ -4,8 +4,9 @@ _target_ : config_schema.Preprocessing
 
 defaults :
  - _self_
- - inputs_outputs : default.yaml
  - paths : default.yaml
+ - inputs_outputs : default.yaml
+
 
 feature_eng : 
   _target_ : preprocessing.feature_eng.FeatureEng       # Name of the method to use for the feature engineering (cf.py file) : current option available

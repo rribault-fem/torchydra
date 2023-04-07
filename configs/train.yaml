@@ -6,26 +6,21 @@ _target_: config_schema.Preprocessing
 
 defaults:
   - _self_
-  - hydra: default.yaml
   - preprocessing: default.yaml
   - model : surrogate_module.yaml
-  - trainer: gpu.yaml
+  - model_net : conv1D_surr.yaml
+  - trainer: cpu.yaml
   - callbacks : default.yaml
   - logger: tensorboard.yaml
   - data : surrogate.yaml
-  - hparams_search : mnist_optuna.yaml
-  - override hydra/sweeper: optuna
+  - hydra: default.yaml
+  # - hparams_search : mnist_optuna.yaml
+  # - override hydra/sweeper: optuna
 
-model_net :  
-  _target_ : model.components.conv1D_surr.conv1D_surr
-  dropout_rate : 0.5
-  activation : 
-    _target_ : torch.nn.ReLU
-  first_dense_layer_out_features: 128
-  latent_space_dim : 16
-  conv1DT_latent_dim : 512
+  # experiment configs allow for version control of specific hyperparameters
+  # e.g. best hyperparameters for given model and datamodule
+  - experiment : null
 
-  
 
 task_name: "train_surrogate"        # task name, determines output directory path
 

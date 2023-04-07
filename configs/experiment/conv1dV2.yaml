@@ -1,0 +1,15 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+   - override /model_net: conv1D_surrv2.yaml
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+preprocessing:
+   decomp_y_spectrum:
+      decomp_n_component : 32 # for conv1D_surrV2, this shall be 8/16/32
+
+tags: ["surrogate", "conv1dv2"]

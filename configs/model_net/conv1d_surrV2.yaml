@@ -1,0 +1,7 @@
+
+_target_ : model.components.conv1d_surrv2.conv1d_surrv2
+dropout_rate : 0.3
+activation : 
+  _target_ : torch.nn.ReLU
+first_dense_layer_out_features: 128
+latent_space_dim : 512
