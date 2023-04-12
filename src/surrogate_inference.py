@@ -11,8 +11,8 @@ import torch
 from typing import List
 import yaml
 
-SAVE_PATH = r"D:\PreProd\storage"
-DATE = "2022-12-01"
+SAVE_PATH = r"\\10.12.89.104\zefyros_calc\PreProd\storage"
+DATE = "2022-12-06"
 
 envir_dataset_path = os.path.join(SAVE_PATH, DATE.replace('-','\\'), "Environment", "Zefyros", "DataSample_Zefyros.nc")
 envir_dataset = xr.open_dataset(envir_dataset_path)
@@ -162,8 +162,6 @@ else :
         Y_hat_min_env[:,:,i] =  scaler.inverse_transform(y_hat_min_env[:,:,i])
         i+=1
 
-
-
 # Allocate to Neuron object
 Y_channel_list = preprocess.inputs_outputs.neuron_variables
 neuron = Neuron.Neuron()
@@ -187,6 +185,6 @@ neuron.Frequency_psd = preprocess.Frequency_psd.where(preprocess.Frequency_psd>(
 
 neuron.time_psd = envir_dataset.time.values
 # Save netcdf file
-neuron.save_nc(DATE, SAVE_PATH, sensor_name=f'surrogate__Neuron_Tower')
+neuron.save_nc(DATE, SAVE_PATH, sensor_name=f'surrogate_Neuron_Tower')
 
 

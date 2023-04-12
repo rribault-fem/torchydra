@@ -38,7 +38,7 @@ def main(cfg :  DictConfig):
         Returns:
         None
         """
-        load_env_file(f"{hydra.utils.get_original_cwd()}/.env.yaml")
+        load_env_file(f"{hydra.utils.get_original_cwd()}/env.yaml")
         # Instantiate preprocessing pipeline
         log.info(f"Instantiating Preprocessing <{cfg.preprocessing._target_}>")
         preprocess: Preprocessing = hydra.utils.instantiate(cfg.preprocessing)

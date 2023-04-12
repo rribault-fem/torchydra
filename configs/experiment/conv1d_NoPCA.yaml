@@ -4,7 +4,7 @@
 # python train.py experiment=example
 
 defaults:
-   - override /model_net: conv1D_surrv2.yaml
+   - override /model_net: conv1D_surr.yaml
 
 # all parameters below will be merged with parameters from default configurations set above
 # this allows you to overwrite only specified parameters
