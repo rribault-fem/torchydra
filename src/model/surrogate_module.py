@@ -73,8 +73,11 @@ class SurrogateModule(LightningModule):
         # update and log metrics
         self.train_loss(loss)
         self.train_mse(preds, targets)
+
+        # log metrics for the logger (default with tensorboard)
         self.log("train/loss", self.train_loss, on_step=False, on_epoch=True, prog_bar=True)
         self.log("train/mse", self.train_mse, on_step=False, on_epoch=True, prog_bar=True)
+        
 
         # return loss or backpropagation will fail
         return loss
@@ -90,6 +93,7 @@ class SurrogateModule(LightningModule):
         self.val_mse(preds, targets)
         self.log("val/loss", self.val_loss, on_step=False, on_epoch=True, prog_bar=True)
         self.log("val/mse", self.val_mse, on_step=False, on_epoch=True, prog_bar=True)
+        self.log('hp_metric', self.train_loss)
 
     def on_validation_epoch_end(self):
         acc = self.val_mse.compute()  # get current val acc
