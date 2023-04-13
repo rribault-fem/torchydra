@@ -10,14 +10,18 @@ from model.components import conv1D_surr
 import torch
 from typing import List
 import yaml
+from utils.load_env_file import load_env_file
 
-SAVE_PATH = r"\\10.12.89.104\zefyros_calc\PreProd\storage"
+load_env_file("env.yaml")
+
+SAVE_PATH = os.environ["INFER_SAVE_PATH"]
 DATE = "2022-12-06"
 
 envir_dataset_path = os.path.join(SAVE_PATH, DATE.replace('-','\\'), "Environment", "Zefyros", "DataSample_Zefyros.nc")
 envir_dataset = xr.open_dataset(envir_dataset_path)
 
-experiment_path = r"C:\Users\zefyros_calc\Documents\deep_learning_training\Deep_learning_model_training\multirun\2023-04-05\15-48-14\29"
+
+experiment_path = os.environ["INFER_EXPERIMENT_PATH"]
 
 # load preprocessing pipeline
 preprocess_path = os.path.join(experiment_path, "preprocessing.pkl")
@@ -185,6 +189,6 @@ neuron.Frequency_psd = preprocess.Frequency_psd.where(preprocess.Frequency_psd>(
 
 neuron.time_psd = envir_dataset.time.values
 # Save netcdf file
-neuron.save_nc(DATE, SAVE_PATH, sensor_name=f'surrogate_Neuron_Tower')
+neuron.save_nc(DATE, SAVE_PATH, ann_name=f'surrogate_Neuron_Tower')
 
 

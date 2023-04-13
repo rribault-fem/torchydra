@@ -80,6 +80,10 @@ The directory structure of new project looks like this:
 To run this script, use the following command: `python train_surrogate.py`
 This will train a surrogate model using the specified configuration and save it for future use.
 
+## Recover shared models and datasets
+To recover the shared models and datasets, you need to download the data from DVC.
+run DVC pull in the project root directory.
+
 ## Pre-processing
 
 The `Pre_process_data` function is used to pre-process the data before training. It loads the dataset and performs various operations such as dropping missing values and rearranging direction columns.
@@ -91,6 +95,12 @@ The `Train_model` function is used to train the surrogate model. It imports the 
 ## Saving
 
 After training, both the pipeline and trained model are saved for future use.
+
+## INFER
+
+Check path definition in env.yaml
+run python surrogate_inference.py
+
 
 
 ## Configuration example
