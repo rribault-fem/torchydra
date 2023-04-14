@@ -132,7 +132,6 @@ for env_sample in X_env :
     for i, key in enumerate(env_uncertainty.keys()):
         sample[:, hour, i] = norm(loc=(env_sample[preprocess.inputs_outputs.envir_variables.index(key)]),
                          scale=(abs(env_sample[preprocess.inputs_outputs.envir_variables.index(key)]*env_uncertainty[key]))/1.97).ppf(sample[:,hour, i])
-        print(sample[:, hour, i])
     hour+=1
 for i in range(sample.shape[0]):
     # scale the input sample
@@ -146,14 +145,17 @@ y_output_sample = np.array(y_output_sample)
     
 # take the 99% percentice of the sample (none, 512, 6) on axis 1  
     
-y_hat_max_env = np.percentile(y_sample, 99.9, axis=0)
-y_hat_min_env = np.percentile(y_sample, 0.1, axis=0)
+y_hat_max_env = np.percentile(y_output_sample, 99.9, axis=0)
+y_hat_min_env = np.percentile(y_output_sample, 0.1, axis=0)
+y_hat_mean = np.mean(y_output_sample, axis=0)
 
 # unscale y_hat
 Y_hat_max_env_int= np.zeros_like(y_hat_max_env)
 Y_hat_min_env_int= np.zeros_like(y_hat_min_env)
+Y_hat_mean_env_int = np.zeros_like(y_hat_mean)
 Y_hat_max_env = np.zeros((batch_size, spectrum_length, channel_nb ))
 Y_hat_min_env = np.zeros((batch_size, spectrum_length, channel_nb ))
+Y_hat_mean_env = np.zeros((batch_size, spectrum_length, channel_nb ))
 
 if preprocess.perform_decomp :
     i=0
@@ -162,12 +164,16 @@ if preprocess.perform_decomp :
         Y_hat_max_env[:,:,i] =  pca.inverse_transform(Y_hat_max_env_int[:,:,i])
         Y_hat_min_env_int[:,:,i] =  scaler.inverse_transform(y_hat_min_env[:,:,i])
         Y_hat_min_env[:,:,i] = pca.inverse_transform(Y_hat_min_env_int[:,:,i])
+        Y_hat_mean_env_int[:,:,i] =  scaler.inverse_transform(y_hat_mean[:,:,i])     
+        Y_hat_mean_env[:, :, i] = pca.inverse_transform(Y_hat_mean_env_int[:,:,i])
         i+=1
 else :
     i=0
     for scaler in Yscalers:
         Y_hat_max_env[:,:,i] =  scaler.inverse_transform(y_hat_max_env[:,:,i])
         Y_hat_min_env[:,:,i] =  scaler.inverse_transform(y_hat_min_env[:,:,i])
+        Y_hat_mean_env[:,:,i] =  scaler.inverse_transform(y_hat_mean[:,:,i])        
+
         i+=1
 
 
@@ -184,7 +190,7 @@ for channel in Y_channel_list:
     units_dict[f'{channel}_max_env'] = units_dict[channel]
     units_dict[f'{channel}_min_env'] = units_dict[channel]
     
-    neuron.allocate_ann_psd_inference(channel, units_dict, Y_hat[:,:,i])
+    neuron.allocate_ann_psd_inference(channel, units_dict, Y_hat_mean_env[:,:,i])
     neuron.allocate_ann_psd_inference(f'{channel}_max_env', units_dict, Y_hat_max_env[:,:,i])
     neuron.allocate_ann_psd_inference(f'{channel}_min_env', units_dict, Y_hat_min_env[:,:,i])
     i+=1
