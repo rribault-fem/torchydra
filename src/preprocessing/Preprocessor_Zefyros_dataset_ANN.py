@@ -68,43 +68,43 @@ def find_training_and_test_set(df, test_set_number, cluster_nb, envir_bin)  :
     count = 0
     found=False
     max_guesses_allowed = 200
-    log = logging.getLogger('train_surrogate')
-    log.info('#####')
-    log.info("start guessing valid training / test set with the following environmental bin :")
-    log.info(str(envir_bin))
-    log.info(f'looking for {test_set_number} test samples in training set, divided in {cluster_nb} clusters ')
+
+    environmental_bin = {
+        'hs' : 1,  
+        'tp' : 2,
+        'dp' : 45,
+        'mag10' : 2,
+        'theta10': 45}
     
+    training_list = np.arange(0,len(df))
+
+    div = int(len(training_list) / cluster_nb)
+    test_number = int(test_set_number/cluster_nb)
+
     while not found and count < max_guesses_allowed:
-
-        training_list = np.arange(0,len(df.time.values))
-
-        div = int(len(df.time.values) / cluster_nb)
-
-        test_list = []
+        test_index = []
+        test_number = int(test_set_number/cluster_nb)
         for i in range(cluster_nb) :
-            if i == cluster_nb :
-                test_list += random.sample(range(i*div, len(training_list)), int(test_set_number/cluster_nb)) 
-            else: test_list += random.sample(range(i*div, (i+1)*div), int(test_set_number/cluster_nb))
-
-        test_list.sort()
-
-        training_list=np.delete(training_list, test_list)
-
-        df_test = df.isel(time=test_list)
-        df_training = df.isel(time=training_list)
+            if i != cluster_nb-1:
+                test_index += random.sample(range(i*div, (i+1)*div), test_number)
+            else:
+                if not (test_set_number/cluster_nb) % 1 == 0:
+                    test_number+=1
+                test_index += random.sample(range(i*div, len(training_list)), test_number)
+            
+        test_index.sort()
+        df_test = df.iloc[test_index]
+        df_training = df.drop(test_index, errors='ignore')
 
         nb_training_sample_in_bin = []
-
-
-        for test_time in df_test.time.values :
-
-            df_valid = df_training
-            list_var=''
-            for envir_var in envir_bin.keys() :
-                df_valid = get_valid_training_samples_for_one_test_sample_on_one_variable(df_valid, df_test, test_time, envir_var, envir_bin)
-                list_var = list_var + ' & ' + envir_var
-                # log = logging.getLogger('train_surrogate') log.info('Nb samples with valid {} : {} '.format(envir_var, str(len(df_valid.time)) ))
-            nb_training_sample_in_bin.append(len(df_valid.time))
+        for value in df_test.values:
+            delected_training = df_training.loc[
+                (df_training['mag10']>=value[0]-environmental_bin['mag10']) & (df_training['mag10']<=value[0]+environmental_bin['mag10']) &
+                (df_training['theta10']>=value[1]-environmental_bin['theta10']) & (df_training['theta10']<=value[1]+environmental_bin['theta10']) &
+                (df_training['hs']>=value[2]-environmental_bin['hs']) & (df_training['hs']<=value[2]+environmental_bin['hs']) &
+                (df_training['tp']>=value[3]-environmental_bin['tp']) & (df_training['tp']<=value[3]+environmental_bin['tp']) &
+                (df_training['dp']>=value[4]-environmental_bin['dp']) & (df_training['dp']<=value[4]+environmental_bin['dp'])].index
+            nb_training_sample_in_bin.append(len(delected_training))
 
         nb_training_sample_in_bin_dict = {
             "attrs":{
@@ -122,15 +122,12 @@ def find_training_and_test_set(df, test_set_number, cluster_nb, envir_bin)  :
 
         if float(df_test.nb_training.min().values) >= 1 :
             found = True
-            
-            log.info(' Success : test_set found. returning valid dataset with len {} vs. training set '.format(str(len(df_test.time))))
-            log.info('#####')
+            print(' Success : test_set found. returning valid dataset with len {} vs. training set '.format(str(len(df_test.time))))
             return df_training, df_test
         elif count%10 == 0 :
-            log.info(f'all guess until {count} failed. Keep trying')
+            print(f'all guess until {count} failed. Keep trying')
+            return False, False
         count +=1
-
-    return False, False
 
 
 def compute_wavelet_coeff_for_CNN(input_set, wavelet_scales,  waveletname) :

@@ -148,37 +148,42 @@ class Split_transform :
         log.info(str(self.envir_bin))
         log.info(f'looking for {self.test_nb} test samples in training set, divided in {self.cluster} clusters ')
         
+        environmental_bin = {
+            'hs' : 1,  
+            'tp' : 2,
+            'dp' : 45,
+            'mag10' : 2,
+            'theta10': 45}
+        
+        training_list = np.arange(0,len(df))
+
+        div = int(len(training_list)/self.cluster)
+        test_number = int(self.test_nb/self.cluster)
+
         while not found and count < max_guesses_allowed:
-
-            training_list = np.arange(0,len(df.time.values))
-
-            div = int(len(df.time.values) / self.cluster)
-
-            test_list = []
-            for i in range(self.cluster) :
-                if i == self.cluster :
-                    test_list += random.sample(range(i*div, len(training_list)), int(self.test_nb/self.cluster)) 
-                else: test_list += random.sample(range(i*div, (i+1)*div), int(self.test_nb/self.cluster))
-
-            test_list.sort()
-
-            training_list=np.delete(training_list, test_list)
-
-            df_test = df.isel(time=test_list)
-            df_training = df.isel(time=training_list)
+            test_index = []
+            test_number = int(self.test_nb/self.cluster)
+            for i in range(self.test_nb) :
+                if i != self.test_nb-1:
+                    test_index += random.sample(range(i*div, (i+1)*div), test_number)
+                else:
+                    if not (self.test_nb/self.cluster) % 1 == 0:
+                        test_number+=1
+                    test_index += random.sample(range(i*div, len(training_list)), test_number)
+                
+            test_index.sort()
+            df_test = df.iloc[test_index]
+            df_training = df.drop(test_index, errors='ignore')
 
             nb_training_sample_in_bin = []
-
-
-            for test_time in df_test.time.values :
-
-                df_valid = df_training
-                list_var=''
-                for envir_var in self.envir_bin.keys() :
-                    df_valid = self.get_valid_training_samples_for_one_test_sample_on_one_variable(df_valid, df_test, test_time, envir_var, self.envir_bin)
-                    list_var = list_var + ' & ' + envir_var
-                    # log = logging.getLogger('train_surrogate') log.info('Nb samples with valid {} : {} '.format(envir_var, str(len(df_valid.time)) ))
-                nb_training_sample_in_bin.append(len(df_valid.time))
+            for value in df_test.values:
+                delected_training = df_training.loc[
+                    (df_training['mag10']>=value[0]-environmental_bin['mag10']) & (df_training['mag10']<=value[0]+environmental_bin['mag10']) &
+                    (df_training['theta10']>=value[1]-environmental_bin['theta10']) & (df_training['theta10']<=value[1]+environmental_bin['theta10']) &
+                    (df_training['hs']>=value[2]-environmental_bin['hs']) & (df_training['hs']<=value[2]+environmental_bin['hs']) &
+                    (df_training['tp']>=value[3]-environmental_bin['tp']) & (df_training['tp']<=value[3]+environmental_bin['tp']) &
+                    (df_training['dp']>=value[4]-environmental_bin['dp']) & (df_training['dp']<=value[4]+environmental_bin['dp'])].index
+                nb_training_sample_in_bin.append(len(delected_training))
 
             nb_training_sample_in_bin_dict = {
                 "attrs":{
@@ -196,15 +201,12 @@ class Split_transform :
 
             if float(df_test.nb_training.min().values) >= 1 :
                 found = True
-                
-                log.info(' Success : test_set found. returning valid dataset with len {} vs. training set '.format(str(len(df_test.time))))
-                log.info('#####')
+                print(' Success : test_set found. returning valid dataset with len {} vs. training set '.format(str(len(df_test.time))))
                 return df_training, df_test
             elif count%10 == 0 :
-                log.info(f'all guess until {count} failed. Keep trying')
+                print(f'all guess until {count} failed. Keep trying')
+                return False, False
             count +=1
-
-        return False, False
 
     def get_valid_training_samples_for_one_test_sample_on_one_variable(self, df_training, df_test, test_time_index, variable, envir_bin) :
         # catch key error on df_test : 
