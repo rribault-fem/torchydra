@@ -132,7 +132,7 @@ class Split_transform :
         os.makedirs(os.path.dirname(df_train_set_envir_filename), exist_ok=True)
         df_training_set.to_netcdf(os.path.join(df_train_set_envir_filename))
 
-    def find_test_set_in_model_validity_domain(self, df )  :
+    def find_test_set_in_model_validity_domain(self, df):
         """This function is used to find a valid test set.
         The validity domain of the model is defined by the environmental bin.
         A test sample is within validity domain of the model if it exist a training sample "close" to the test sample.
@@ -147,13 +147,6 @@ class Split_transform :
         log.info("start guessing valid training / test set with the following environmental bin :")
         log.info(str(self.envir_bin))
         log.info(f'looking for {self.test_nb} test samples in training set, divided in {self.cluster} clusters ')
-        
-        environmental_bin = {
-            'hs' : 1,  
-            'tp' : 2,
-            'dp' : 45,
-            'mag10' : 2,
-            'theta10': 45}
         
         training_list = np.arange(0,len(df))
 
@@ -176,14 +169,25 @@ class Split_transform :
             df_training = df.drop(test_index, errors='ignore')
 
             nb_training_sample_in_bin = []
-            for value in df_test.values:
-                delected_training = df_training.loc[
-                    (df_training['mag10']>=value[0]-environmental_bin['mag10']) & (df_training['mag10']<=value[0]+environmental_bin['mag10']) &
-                    (df_training['theta10']>=value[1]-environmental_bin['theta10']) & (df_training['theta10']<=value[1]+environmental_bin['theta10']) &
-                    (df_training['hs']>=value[2]-environmental_bin['hs']) & (df_training['hs']<=value[2]+environmental_bin['hs']) &
-                    (df_training['tp']>=value[3]-environmental_bin['tp']) & (df_training['tp']<=value[3]+environmental_bin['tp']) &
-                    (df_training['dp']>=value[4]-environmental_bin['dp']) & (df_training['dp']<=value[4]+environmental_bin['dp'])].index
-                nb_training_sample_in_bin.append(len(delected_training))
+            for test_time in df_test.time.values :
+
+                df_valid = df_training
+                list_var=''
+                for envir_var in self.envir_bin.keys() :
+                    df_valid = self.get_valid_training_samples_for_one_test_sample_on_one_variable(df_valid, df_test, test_time, envir_var, self.envir_bin)
+                    list_var = list_var + ' & ' + envir_var
+                    # log = logging.getLogger('train_surrogate') log.info('Nb samples with valid {} : {} '.format(envir_var, str(len(df_valid.time)) ))
+                nb_training_sample_in_bin.append(len(df_valid.time))
+                
+                            
+            # for value in df_test.values:
+            #    delected_training = df_training.loc[
+            #        (df_training['mag10']>=value[0]-environmental_bin['mag10']) & (df_training['mag10']<=value[0]+environmental_bin['mag10']) &
+            #        (df_training['theta10']>=value[1]-environmental_bin['theta10']) & (df_training['theta10']<=value[1]+environmental_bin['theta10']) &
+            #        (df_training['hs']>=value[2]-environmental_bin['hs']) & (df_training['hs']<=value[2]+environmental_bin['hs']) &
+            #        (df_training['tp']>=value[3]-environmental_bin['tp']) & (df_training['tp']<=value[3]+environmental_bin['tp']) &
+            #        (df_training['dp']>=value[4]-environmental_bin['dp']) & (df_training['dp']<=value[4]+environmental_bin['dp'])].index
+            #    nb_training_sample_in_bin.append(len(delected_training))
 
             nb_training_sample_in_bin_dict = {
                 "attrs":{
