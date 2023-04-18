@@ -63,37 +63,40 @@ Train model with default configuration
 
 ```bash
 # train on CPU
-python src/train_surrogate.py trainer=cpu
+python src/train.py trainer=cpu
 
 # train on GPU
-python src/train_surrogate.py trainer=gpu
+python src/train.py trainer=gpu
 ```
 
 Train model with chosen experiment configuration from [configs/experiment/](configs/experiment/)
 
+
 ```bash
-python src/train_surrogate.py experiment=experiment_name.yaml
+python src/train.py experiment=experiment_name.yaml
 ```
 
 You can override any parameter from command line like this
 
 ```bash
-python src/train_surrogate.py trainer.max_epochs=20 data.batch_size=64
+python src/train.py trainer.max_epochs=20 data.batch_size=64
 ```
 
 Search for best hyperparameters with [Optuna](https://optuna.org/)
 
 ```bash
-python src/train_surrogate.py -m hparams_search=optuna
+python src/train.py -m hparams_search=optuna
 ```
-python src/train_surrogate.py -m hparams_search=optuna
+python src/train.py -m hparams_search=optuna
 
 ## Outputs
 
 The trained model, logs, experiment configuration and environments used during training are saved in the `outputs` directory.
-One subfolder is created for each taskname define in the config.yaml file.
-For each experiment, a subfolder is created with the current date and time.
+The output sub-directory can be changed by overriding the taks_name in train.yaml file.
+For each run, a subfolder is created with the current date and time.
 This behavior is defined in the configs/hydra/default.yaml file.
+
+Please define tags in the train.yaml file to easily identify your experiments.
 
 <br>
 
@@ -173,7 +176,7 @@ To visualise the training results, you can use the [tensorboard](https://www.ten
 
 ```bash
 # from project root directory
-tensorboard --logdir=outputs/train_surrogate
+tensorboard --logdir=outputs/train
 
 ```
 

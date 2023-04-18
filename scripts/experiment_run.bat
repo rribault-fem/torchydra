@@ -1,1 +1,1 @@
-python src/train_surrogate.py experiment=conv1d_nopca.yaml
+python src/train.py experiment=conv1d_nopca.yaml

@@ -3,7 +3,6 @@ from typing import Any
 import torch
 from lightning import LightningModule
 from torchmetrics import MeanSquaredError, MaxMetric, MeanMetric
-from torchmetrics.classification.accuracy import Accuracy
 
 
 class SurrogateModule(LightningModule):

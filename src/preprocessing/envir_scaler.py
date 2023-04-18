@@ -24,7 +24,8 @@ class Envir_scaler :
         Returns:
             tuple: A tuple containing two elements: x_numpy_channels_training_set and x_numpy_channels_val_set.
         """
-        log = logging.getLogger('train_surrogate')
+        global logger_name
+        log =  logging.getLogger(logger_name)
         # Select user defined Scaler
         log.info('###')
         log.info("select environmental values scaler")

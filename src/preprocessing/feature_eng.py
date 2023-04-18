@@ -26,7 +26,8 @@ class FeatureEng:
         Returns:
             xr.Dataset: An xarray Dataset containing the original data as well as the calculated cosine and sine values.
         """
-        log = logging.getLogger('train_surrogate')
+        global logger_name 
+        log = logging.getLogger(logger_name)
         log.info('###')
         log.info(f'get cos and sin decomposition of the data {dict_key}')
         for magnitude, angle in dict_key.items() :
