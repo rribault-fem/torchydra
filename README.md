@@ -100,6 +100,15 @@ Please define tags in the train.yaml file to easily identify your experiments.
 
 <br>
 
+## Commit results
+
+Once you have trained your model, and get usefull results you can commit the models and dataprocessing objects to the DVC repository.
+
+```bash
+# add the results to the DVC repository
+dvc push
+```
+
 ## Project Structure
 
 The directory structure of new project looks like this:
