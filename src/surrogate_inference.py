@@ -6,7 +6,7 @@ import virtual_sensor.export_data.Neuron as Neuron
 from config_schema import Preprocessing
 from scipy.stats import qmc
 from model.surrogate_module import SurrogateModule
-from model.components import conv1D_surr
+from model.components import conv1d_surr
 import torch
 from typing import List
 import yaml
@@ -15,7 +15,7 @@ from utils.load_env_file import load_env_file
 load_env_file("env.yaml")
 
 SAVE_PATH = os.environ["INFER_SAVE_PATH"]
-DATE = "2022-12-06"
+DATE = "2022-12-01"
 
 envir_dataset_path = os.path.join(SAVE_PATH, DATE.replace('-','\\'), "Environment", "Zefyros", "DataSample_Zefyros.nc")
 envir_dataset = xr.open_dataset(envir_dataset_path)
@@ -37,7 +37,7 @@ with open(hydra_config_path, 'r') as f:
 
 # load a dummy model to load the checkpoint
 kwargs = {'x_input_size': 7, 'spectrum_decomp_length': 24, 'spectrum_channel_nb': 18}
-net = conv1D_surr.conv1D_surr(first_dense_layer_out_features= hydra_config['model_net']['first_dense_layer_out_features'], 
+net = conv1d_surr.conv1d_surr(first_dense_layer_out_features= hydra_config['model_net']['first_dense_layer_out_features'], 
                   latent_space_dim=hydra_config['model_net']['latent_space_dim'], 
                   conv1DT_latent_dim =hydra_config['model_net']['conv1DT_latent_dim'],
                   droupout_rate= hydra_config['model_net']['dropout_rate'],

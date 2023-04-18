@@ -8,8 +8,8 @@ The management of YAML file is based on the hydra package : https://hydra.cc/doc
 Please perform the structured config hydra tutorial before using this package.
 https://hydra.cc/docs/1.0/tutorials/structured_config/intro/
 
-The `PipeConfig` class is used to store the configuration. 
-This class is defined in config_schema.py and is used to validate the configuration YAML file.
+## Set up your own env.yaml file
+
 
 ## Outputs
 The trained model, logs, experiment configuration and environments used during training are saved in the `outputs` directory.

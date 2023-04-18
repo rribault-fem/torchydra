@@ -8,7 +8,7 @@ defaults:
   - _self_
   - preprocessing: default.yaml
   - model : surrogate_module.yaml
-  - model_net : conv1D_surr.yaml
+  - model_net : conv1d_surr.yaml
   - trainer: cpu.yaml
   - callbacks : default.yaml
   - logger: tensorboard.yaml

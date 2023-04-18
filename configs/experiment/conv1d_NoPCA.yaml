@@ -4,11 +4,11 @@
 # python train.py experiment=example
 
 defaults:
-   - override /model_net: conv1D_surr.yaml
+   - override /model_net: conv1d_surr_nopca.yaml
 
 # all parameters below will be merged with parameters from default configurations set above
 # this allows you to overwrite only specified parameters
 preprocessing:
    perform_decomp : False
    
-tags: ["surrogate", "conv1dv2"]
+tags: ["surrogate", "conv1d", "NoPCA"]

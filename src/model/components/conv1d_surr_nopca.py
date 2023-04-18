@@ -3,7 +3,7 @@ import numpy as np
 from torchinfo import summary
 import math
 
-class conv1d_surr(nn.Module):
+class conv1d_surr_nopca(nn.Module):
     """
     A PyTorch Lightning module representing a 1D convolutional neural network
     for surrogate modeling of data.
@@ -18,7 +18,6 @@ class conv1d_surr(nn.Module):
     def __init__(self, activation: nn.Module = nn.ReLU(),
                   first_dense_layer_out_features:int=2**7, 
                   latent_space_dim:int=2**4, 
-                  conv1DT_latent_dim : int= 2**9,
                   droupout_rate : float= None, 
                   **kwargs):
         super().__init__()
@@ -34,15 +33,13 @@ class conv1d_surr(nn.Module):
         self.spectrum_channel_nb : int = kwargs['spectrum_channel_nb']
         self.first_dense_layer_out_features = first_dense_layer_out_features
         self.latent_space_dim = latent_space_dim
-        self.conv1DT_latent_dim = conv1DT_latent_dim
         self.activation = activation
         if droupout_rate is not None:
             self.droupout =  nn.Dropout(p=droupout_rate)
 
         # find number of Layers :
         self.num_dense_layers = int(math.log(self.first_dense_layer_out_features, 2) - math.log(self.latent_space_dim, 2))+1
-        self.num_conv1DT_layers = int(math.log(self.conv1DT_latent_dim, 2) - math.log(self.latent_space_dim, 2))
-        self.num_conv1D_layers = int(math.log(self.conv1DT_latent_dim, 2) - math.log(self.spectrum_decomp_length, 2))
+        self.num_conv1DT_layers = int(math.log(self.spectrum_decomp_length, 2) - math.log(self.latent_space_dim, 2))
 
         of = first_dense_layer_out_features
         dense_layers_out_features = [int(of/(2**i)) for i in range(self.num_dense_layers-1)]
@@ -62,29 +59,16 @@ class conv1d_surr(nn.Module):
         
         conv1DT_in_channel = [of_list[-1]*2**i for i in range(0, self.num_conv1DT_layers)]
         conv1DT_out_channel = [of_list[-1]*2**i for i in range(1, self.num_conv1DT_layers+1)]
+        
 
         self.Conv1DT1 = nn.ConvTranspose1d(conv1DT_in_channel[0], conv1DT_out_channel[0], kernel_size=conv1DT_out_channel[0], stride=2 )
         for i in range(1, self.num_conv1DT_layers) :
             stride = 2
             kernel_size = get_kernel_size(conv1DT_in_channel[i], conv1DT_out_channel[i], stride = stride)
             conv1DT_layer = nn.ConvTranspose1d(conv1DT_in_channel[i], conv1DT_out_channel[i], kernel_size=kernel_size, stride=stride)
+            if i==self.num_conv1DT_layers-1 :
+                conv1DT_layer = nn.ConvTranspose1d(conv1DT_in_channel[i], self.spectrum_channel_nb, kernel_size=kernel_size, stride=stride)
             setattr(self, f"Conv1DT{i+1}", conv1DT_layer)
-
-
-        # finally filter the output to get the desired output shape
-        conv1D_in_channel = [int(self.conv1DT_latent_dim/(2**i)) for i in range(self.num_conv1D_layers-1)]
-        conv1D_out_channel = [int(self.conv1DT_latent_dim/(2**(i+1))) for i in range(self.num_conv1D_layers-1)]
-
-        for i in range(self.num_conv1D_layers-1) :
-            stride = 2
-            conv1D_layer = nn.Conv1d(conv1D_in_channel[i], conv1D_out_channel[i], kernel_size=2, stride=stride )
-            setattr(self, f"Conv1D{i}", conv1D_layer)
-        
-        stride = 2
-        k_size = conv1D_out_channel[-1]-(self.spectrum_decomp_length-1)*stride
-        conv1D_layer = nn.Conv1d(conv1D_out_channel[-1], self.spectrum_channel_nb, kernel_size=k_size, stride=stride )
-        setattr(self, f"Conv1D{i+1}", conv1D_layer)
-
 
         summary(self, input_size=(self.x_input_size,))     
 
@@ -114,40 +98,9 @@ class conv1d_surr(nn.Module):
             if hasattr(self, "dropout") :
                 x = self.dropout(x)
  
-        # finally filter the output to get the desired output shape
-        for i in range(self.num_conv1D_layers) :
-            x = self.activation(getattr(self, f"Conv1D{i}")(x))
-            if hasattr(self, "dropout") :
-                x = self.dropout(x)
         x= x.permute(0, 2, 1)
-        # for i in range(1):
-        #     x = nn.functional.relu(self.Conv1D(x))
         return x
-
-        
-    # def train_surrogate(self, x_train : np.array, x_test: np.array, y_train: np.array, y_test: np.array,
-    #                      epochs : int =100, batch_size : int =32, loss : str = 'mse', learn_rate : float =0.001, dropout_rate : float =0.3, verbose : int =1) :
-    #     """Train the autoencoder on the given data"""
-        
-    #     # Define the model
-    #     self.compile(optimizer=Adam(learning_rate=learn_rate), loss=loss)
-
-    #     # create a TensorBoard callback
-    #     tensorboard_callback = TensorBoard(log_dir='./tb_logs')
-
-    #     history = self.fit(
-    #         x_train,
-    #         y_train,
-    #         epochs=epochs,
-    #         batch_size=batch_size,
-    #         validation_data=(x_test, y_test),
-    #         verbose=verbose,
-    #         callbacks=[tensorboard_callback]
-    #     )
-
-    #     self.history = pd.DataFrame(history.history)
-    #     self.history['epoch'] = self.history.index.values
-
+    
 if __name__ == '__main__':
     # Test the model
     kwargs = {
@@ -155,7 +108,6 @@ if __name__ == '__main__':
         "spectrum_decomp_length" : 512,
         "spectrum_channel_nb" : 18}
 
-    model = conv1d_surr(first_dense_layer_out_features =2**7, 
+    model = conv1d_surr_nopca(first_dense_layer_out_features =2**7, 
     latent_space_dim =2**4,
-    conv1DT_latent_dim = 2**9,
     **kwargs)
