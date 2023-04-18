@@ -157,7 +157,7 @@ class Split_transform :
             test_list = []
             for i in range(self.cluster) :
                 if i == self.cluster -1:
-                    test_list += random.sample(range(i*div, len(training_list)), int(self.test_nb/self.cluster)) 
+                    test_list += random.sample(range(i*div, len(training_list)), int(self.test_nb/self.cluster))
                 else: test_list += random.sample(range(i*div, (i+1)*div), int(self.test_nb/self.cluster))
 
             test_list.sort()

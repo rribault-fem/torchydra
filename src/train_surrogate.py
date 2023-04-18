@@ -113,13 +113,8 @@ def main(cfg :  DictConfig):
 
         train_metrics = trainer.callback_metrics
 
-
+        # return the metric to optimise for hyper parameter search
         return train_metrics['train/loss']
-
-        Train_model(pipe, surrogate, x_train, y_train, x_test, y_test)
-
-        # Save model
-        surrogate.save_model(pipe, model)
 
 
 
@@ -176,8 +171,6 @@ def Pre_process_data(preprocess : Preprocessing):
         ####
         # Split data into train and test sets. 
         ####
-        # log.info(f"Instantiating split_transform <{pipe.preprocessing.split_transform._target_}>")
-        # split_transform: Split_transform = hydra.utils.instantiate(pipe.preprocessing.split_transform)
         X_train, X_test, Y_train, Y_test = preprocess.split_transform.process_data(df=df, 
                                                                         X_channel_list=preprocess.inputs_outputs.envir_variables,
                                                                         Y_channel_list=preprocess.inputs_outputs.neuron_variables,
@@ -208,25 +201,6 @@ def Pre_process_data(preprocess : Preprocessing):
         log.info(f'y_train shape: {np.shape(y_train)}')
 
         return x_train, y_train, x_test, y_test
-
-
-
-# def Train_model(pipe : PipeConfig, x_train : np.ndarray, y_train : np.ndarray, x_test : np.ndarray, y_test : np.ndarray, surrogate : SurrogateModel, x_scaler, y_scalers, unit_dictionnary, y_pcas) -> None:
-
-#         # Train model
-#         surrogate = surrogate(np.shape(y_train)[2], np.shape(x_train)[1])
-#         surrogate.dataset_path = pipe.paths.training_env_dataset
-#         surrogate.input_variables = pipe.inputs_outputs.envir_variables
-#         surrogate.output_variables = pipe.inputs_outputs.neuron_variables
-#         surrogate.Frequency_psd(pipe.preprocessing.cut_low_frequency)
-
-#         surrogate.set_units_dictionnary(unit_dictionnary)
-#         surrogate.set_modelname(pipe.model.name, pipe.model.version)
-
-#         return surrogate
-
-        
-
 
 if __name__ == "__main__":
     main()

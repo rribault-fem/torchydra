@@ -124,29 +124,6 @@ class conv1d_surr(nn.Module):
         #     x = nn.functional.relu(self.Conv1D(x))
         return x
 
-        
-    # def train_surrogate(self, x_train : np.array, x_test: np.array, y_train: np.array, y_test: np.array,
-    #                      epochs : int =100, batch_size : int =32, loss : str = 'mse', learn_rate : float =0.001, dropout_rate : float =0.3, verbose : int =1) :
-    #     """Train the autoencoder on the given data"""
-        
-    #     # Define the model
-    #     self.compile(optimizer=Adam(learning_rate=learn_rate), loss=loss)
-
-    #     # create a TensorBoard callback
-    #     tensorboard_callback = TensorBoard(log_dir='./tb_logs')
-
-    #     history = self.fit(
-    #         x_train,
-    #         y_train,
-    #         epochs=epochs,
-    #         batch_size=batch_size,
-    #         validation_data=(x_test, y_test),
-    #         verbose=verbose,
-    #         callbacks=[tensorboard_callback]
-    #     )
-
-    #     self.history = pd.DataFrame(history.history)
-    #     self.history['epoch'] = self.history.index.values
 
 if __name__ == '__main__':
     # Test the model
