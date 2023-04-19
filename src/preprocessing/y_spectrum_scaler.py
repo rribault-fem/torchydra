@@ -24,8 +24,8 @@ class Y_spectrum_scaler :
         Returns:
             tuple: A tuple containing two elements: y_train and y_test.
         """
-        
-        log = logging.getLogger('train_surrogate')
+        global logger_name
+        log =  logging.getLogger(logger_name)
         log.info('scale the y spectrum data')
         
         # Prepare empty output arrays

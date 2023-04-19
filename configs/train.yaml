@@ -8,18 +8,19 @@ defaults:
   - _self_
   - preprocessing: default.yaml
   - model : surrogate_module.yaml
-  - model_net : conv1D_surr.yaml
+  - model_net : conv1d_surr.yaml
   - trainer: cpu.yaml
   - callbacks : default.yaml
   - logger: tensorboard.yaml
   - data : surrogate.yaml
   - hydra: default.yaml
-  # - hparams_search : mnist_optuna.yaml
-  # - override hydra/sweeper: optuna
 
   # experiment configs allow for version control of specific hyperparameters
   # e.g. best hyperparameters for given model and datamodule
   - experiment : null
+
+  # config for hyperparameter optimization
+  - hparams_search: null
 
 
 task_name: "train_surrogate"        # task name, determines output directory path

@@ -1,0 +1,1 @@
+python src/train.py experiment=conv1d_nopca.yaml

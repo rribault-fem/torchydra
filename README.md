@@ -1,23 +1,117 @@
-# Deep_learning_model_training
-# Surrogate Model Training
-This script trains a surrogate model using the specified configuration.
+# Introduction
 
-## Configuration
-The configuration is stored in a YAML file and can be modified to change the behavior of the training process. 
-The management of YAML file is based on the hydra package : https://hydra.cc/docs/intro/
-Please perform the structured config hydra tutorial before using this package.
-https://hydra.cc/docs/1.0/tutorials/structured_config/intro/
+✅ This package is used to experiment several deep learning models, save on boilerplate code.
+Easily add new models, datasets, experiments, preprocessing steps.
+By using this template, you can focus on deep learning architecture, hyperparameters tuning and share models and experiments with collegues.
 
-The `PipeConfig` class is used to store the configuration. 
-This class is defined in config_schema.py and is used to validate the configuration YAML file.
+It is based on an opensource project template https://github.com/ashleve/lightning-hydra-template and uses the following packages:
+
+[PyTorch Lightning](https://github.com/PyTorchLightning/pytorch-lightning) - a lightweight PyTorch wrapper for high-performance AI research. Think of it as a framework for organizing your PyTorch code.
+
+[Hydra](https://github.com/facebookresearch/hydra) - a framework for elegantly configuring complex applications. The key feature is the ability to dynamically create a hierarchical configuration by composition and override it through config files and the command line.
+
+--> be familiar with these packages before using this project.
+
+
+## Installation
+
+#### Pip
+
+```bash
+# clone project
+git clone https://github.com/rribault-fem/Deep_learning_model_training
+cd your-repo-name
+
+# [OPTIONAL] create conda environment
+conda create -n myenv python=3.9
+conda activate myenv
+
+# install pytorch according to instructions
+# https://pytorch.org/get-started/
+
+# install requirements
+pip install -r requirements.txt
+```
+#### Conda
+
+```bash
+# clone project
+git clone https://github.com/rribault-fem/Deep_learning_model_training
+cd your-repo-name
+
+# create conda environment and install dependencies
+conda env create -f environment.yaml -n myenv
+
+# activate conda environment
+conda activate myenv
+```
+
+#### DVC
+
+```bash
+# from project root directory, recover the shared models and datasets
+DVC pull
+```
+
+#### env.yaml file
+
+select the path dedicated to your environment in the env.yaml file.
+
+## How to run
+
+Select the output sub-directory by overriding the taks_name in train.yaml file.
+Describe your experiment with a tag in the train.yaml file.
+
+Train model with default configuration
+
+```bash
+# train on CPU
+python src/train.py trainer=cpu
+
+# train on GPU
+python src/train.py trainer=gpu
+```
+
+Train model with chosen experiment configuration from [configs/experiment/](configs/experiment/)
+
+
+```bash
+python src/train.py experiment=experiment_name.yaml
+```
+
+You can override any parameter from command line like this
+
+```bash
+python src/train.py trainer.max_epochs=20 data.batch_size=64
+```
+
+Search for best hyperparameters with [Optuna](https://optuna.org/)
+
+```bash
+python src/train.py -m hparams_search=optuna
+```
+python src/train.py -m hparams_search=optuna
 
 ## Outputs
+
 The trained model, logs, experiment configuration and environments used during training are saved in the `outputs` directory.
-One subfolder is created for each taskname define in the config.yaml file.
-For each experiment, a subfolder is created with the current date and time.
+The output sub-directory can be changed by overriding the taks_name in train.yaml file.
+For each run, a subfolder is created with the current date and time.
 This behavior is defined in the configs/hydra/default.yaml file.
 
+Please define tags in the train.yaml file to easily identify your experiments.
+
 <br>
+
+## Commit results
+
+Once you have trained your model, and get usefull results you can commit the models and dataprocessing objects to the DVC repository.
+
+```bash
+# add the results to the DVC repository
+dvc push
+```
+
 ## Project Structure
 
 The directory structure of new project looks like this:
@@ -73,16 +167,12 @@ The directory structure of new project looks like this:
 ├── setup.py                  <- File for installing project as a package
 └── README.md
 ```
-
 <br>
-
-## Usage
-To run this script, use the following command: `python train_surrogate.py`
-This will train a surrogate model using the specified configuration and save it for future use.
 
 ## Pre-processing
 
-The `Pre_process_data` function is used to pre-process the data before training. It loads the dataset and performs various operations such as dropping missing values and rearranging direction columns.
+The `Pre_process_data` function is used to pre-process the data before training.
+It loads the dataset and performs various operations such as dropping missing values and rearranging direction columns.
 
 ## Training
 
@@ -92,6 +182,16 @@ The `Train_model` function is used to train the surrogate model. It imports the 
 
 After training, both the pipeline and trained model are saved for future use.
 
+## Visualise training results
+
+To visualise the training results, you can use the [tensorboard](https://www.tensorflow.org/tensorboard) tool.
+Tensorboard is the default tool but others are available (cf lightning / hydra ashleve documentation)
+
+```bash
+# from project root directory
+tensorboard --logdir=outputs/train
+
+```
 
 ## Configuration example
 Several scaler and decomposition methods are available : all scalers from scikit-learn and the decomposition methods from scikit-learn. 
@@ -108,3 +208,41 @@ To split a dataset into a test and training data set you can either used the pro
 To change the configuration, edit the `config.yaml` file.
 --> To change a model type, edit the `model_type` parameter.
 
+## Add a new model type for the surrogate model
+To add a new model type for the surrogate model, you need to create a new class in the `src/models/components` folder.
+It shall be a subclass of `nn.Module` and implement the `forward` method.
+refer to the available examples.
+
+Once the class created you need to change the `_target_` parameter in the `model_net` section of the `train.yaml` file.
+
+If needed you can create a new config file in `configs/model_net` to define new parameters for your model.
+
+
+## License
+
+Lightning-Hydra-Template is licensed under the MIT License.
+
+```
+MIT License
+
+Copyright (c) 2021 ashleve
+Copyright (c) 2023 rribault
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

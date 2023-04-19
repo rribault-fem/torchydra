@@ -45,8 +45,8 @@ class Split_transform :
         Returns:
             tuple: A tuple containing four elements: X_train, X_test, Y_train, Y_test.
         """
-        
-        log = logging.getLogger('train_surrogate')
+        global logger_name
+        log =  logging.getLogger(logger_name)
         log.info('###')
 
         # Select the split method defined in hydra config file.
@@ -102,7 +102,8 @@ class Split_transform :
         #     # Y_channel_list.drop('anomaly')
 
         #Prepare Y
-        log = logging.getLogger('train_surrogate')
+        global logger_name
+        log =  logging.getLogger(logger_name)
         Y_numpy_channels_training_set = self.get_numpy_input_channel_set(df_training_set, Y_channel_list)
         log.info('# selected input channels are : {}'.format(str(Y_channel_list)))
         log.info('# channel training set numpy transformation success. Shape of channel training is {} '.format(str(np.shape(Y_numpy_channels_training_set))))
@@ -142,7 +143,8 @@ class Split_transform :
         count = 0
         found=False
         max_guesses_allowed = 200
-        log = logging.getLogger('train_surrogate')
+        global logger_name
+        log =  logging.getLogger(logger_name)
         log.info('#####')
         log.info("start guessing valid training / test set with the following environmental bin :")
         log.info(str(self.envir_bin))
@@ -176,10 +178,9 @@ class Split_transform :
                 for envir_var in self.envir_bin.keys() :
                     df_valid = self.get_valid_training_samples_for_one_test_sample_on_one_variable(df_valid, df_test, test_time, envir_var, self.envir_bin)
                     list_var = list_var + ' & ' + envir_var
-                    # log = logging.getLogger('train_surrogate') log.info('Nb samples with valid {} : {} '.format(envir_var, str(len(df_valid.time)) ))
+                    # log = global logger_name logging.getLogger(logger_name ) log.info('Nb samples with valid {} : {} '.format(envir_var, str(len(df_valid.time)) ))
                 nb_training_sample_in_bin.append(len(df_valid.time))
                 
-                            
             # for value in df_test.values:
             #    delected_training = df_training.loc[
             #        (df_training['mag10']>=value[0]-environmental_bin['mag10']) & (df_training['mag10']<=value[0]+environmental_bin['mag10']) &
@@ -218,7 +219,8 @@ class Split_transform :
             lte = df_test[variable].sel(time=test_time_index).values + envir_bin[variable]
             gte = df_test[variable].sel(time=test_time_index).values - envir_bin[variable]
         except KeyError :
-            log = logging.getLogger('train_surrogate')
+            global logger_name
+            log =  logging.getLogger(logger_name)
             log.info('KeyError : variable {} not found in df_test'.format(variable))
             return False
             

@@ -6,20 +6,25 @@ import virtual_sensor.export_data.Neuron as Neuron
 from config_schema import Preprocessing
 from scipy.stats import qmc
 from model.surrogate_module import SurrogateModule
-from model.components import conv1D_surr
 import torch
 from typing import List
 import yaml
+from utils.load_env_file import load_env_file
+import hydra
 
-SAVE_PATH = r"D:\PreProd\storage"
-DATE = "2022-12-06"
+load_env_file("env.yaml")
+
+SAVE_PATH = os.environ["INFER_SAVE_PATH"]
+DATE = "2022-12-01"
 
 envir_dataset_path = os.path.join(SAVE_PATH, DATE.replace('-','\\'), "Environment", "Zefyros", "DataSample_Zefyros.nc")
 envir_dataset = xr.open_dataset(envir_dataset_path)
 
-experiment_path = r"C:\Users\zefyros_calc\Documents\deep_learning_training\Deep_learning_model_training\multirun\2023-04-05\15-48-14\29"
+
+experiment_path = os.environ["INFER_EXPERIMENT_PATH"]
 
 # load preprocessing pipeline
+# Use of pickle object to load the scaler already fit to the data
 preprocess_path = os.path.join(experiment_path, "preprocessing.pkl")
 with open(preprocess_path, 'rb') as f:
     preprocess : Preprocessing = pickle.load(f)
@@ -31,14 +36,11 @@ hydra_config_path = os.path.join(experiment_path, r'.hydra/config.yaml' )
 with open(hydra_config_path, 'r') as f:
     hydra_config = yaml.safe_load(f)
 
-# load a dummy model to load the checkpoint
-kwargs = {'x_input_size': 7, 'spectrum_decomp_length': 24, 'spectrum_channel_nb': 18}
-net = conv1D_surr.conv1D_surr(first_dense_layer_out_features= hydra_config['model_net']['first_dense_layer_out_features'], 
-                  latent_space_dim=hydra_config['model_net']['latent_space_dim'], 
-                  conv1DT_latent_dim =hydra_config['model_net']['conv1DT_latent_dim'],
-                  droupout_rate= hydra_config['model_net']['dropout_rate'],
-                   **kwargs)
+# load a dummy model with dummy kwargs to load the checkpoint
+kwargs = {'x_input_size': 7, 'spectrum_decomp_length': 512, 'spectrum_channel_nb': 18}
+net: torch.nn.Module = hydra.utils.instantiate(hydra_config['model_net'], **kwargs)
 
+# model kwargs parameters are infered from checkpoint
 model : SurrogateModule = SurrogateModule.load_from_checkpoint(model_path, net=net)
 
 # Load environment inputs
@@ -46,19 +48,10 @@ X_channel_list : List[str] = preprocess.inputs_outputs.envir_variables
 
 # Prepare test data for inference
 df= envir_dataset
-for dict_key in [{'mag10':'theta10'}, {'hs':'dp'}] : #, {'cur':'cur_dir'}] :
+envir_direction_dict = preprocess.feature_eng.envir_direction_dict
+for dict_key in envir_direction_dict :
     df = preprocess.feature_eng.get_cos_sin_decomposition(dict_key, df)
-
 X_env = preprocess.split_transform.get_numpy_input_envir_set(df, X_channel_list)
-#input_variables_uncertainty = model_object.input_variables_uncertainty
-
-# # Load scalers
-# with open(model_object.envir_scaler_path, 'rb') as f:
-#     Xscaler = pickle.load(f)
-# with open(model_object.spectrum_scaler_path, 'rb') as f:
-#     Yscalers = pickle.load(f)
-# with open(model_object.pca_path, 'rb') as f:
-#     PCAs = pickle.load(f)
 x_env = preprocess.envir_scaler.scaler.transform(X_env)
 
 # predict nominal spectrum thanks to the surrogate model
@@ -176,8 +169,6 @@ else :
 
         i+=1
 
-
-
 # Allocate to Neuron object
 Y_channel_list = preprocess.inputs_outputs.neuron_variables
 neuron = Neuron.Neuron()
@@ -201,6 +192,6 @@ neuron.Frequency_psd = preprocess.Frequency_psd.where(preprocess.Frequency_psd>(
 
 neuron.time_psd = envir_dataset.time.values
 # Save netcdf file
-neuron.save_nc(DATE, SAVE_PATH, sensor_name=f'surrogate__Neuron_Tower')
+neuron.save_nc(DATE, SAVE_PATH, ann_name=f'surrogate_Neuron_Tower')
 
 

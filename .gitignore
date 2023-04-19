@@ -4,7 +4,7 @@
 *.tar.gz
 
 # local path configs
-.env.yaml
+env.yaml
 
 
 multirun/

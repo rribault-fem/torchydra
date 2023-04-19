@@ -16,8 +16,6 @@ from utils.load_env_file import load_env_file
 import os
 import math
 
-log = logging.getLogger('train_surrogate')
-
 # version_base=1.1 is used to make hydra change the current working directory to the hydra output path
 @hydra.main(config_path="../configs", config_name="train.yaml", version_base="1.1")
 def main(cfg :  DictConfig):
@@ -38,7 +36,11 @@ def main(cfg :  DictConfig):
         Returns:
         None
         """
-        load_env_file(f"{hydra.utils.get_original_cwd()}/.env.yaml")
+        load_env_file(f"{hydra.utils.get_original_cwd()}/env.yaml")
+        global logger_name
+        logger_name = cfg.task_name
+        log = logging.getLogger(logger_name)
+
         # Instantiate preprocessing pipeline
         log.info(f"Instantiating Preprocessing <{cfg.preprocessing._target_}>")
         preprocess: Preprocessing = hydra.utils.instantiate(cfg.preprocessing)
@@ -113,17 +115,12 @@ def main(cfg :  DictConfig):
 
         train_metrics = trainer.callback_metrics
 
-
+        # return the metric to optimise for hyper parameter search
         return train_metrics['train/loss']
 
-        Train_model(pipe, surrogate, x_train, y_train, x_test, y_test)
-
-        # Save model
-        surrogate.save_model(pipe, model)
 
 
-
-def Pre_process_data(pipe : Preprocessing):
+def Pre_process_data(preprocess : Preprocessing):
         """
         This function pre-processes the data before training. It takes in an instance of the `PipeConfig` class and uses it to perform various operations on the data.
 
@@ -142,61 +139,59 @@ def Pre_process_data(pipe : Preprocessing):
         ####
         #Start pipeline
         ####
-        df = xr.open_dataset(pipe.paths['dataset'])
+        df = xr.open_dataset(preprocess.paths['dataset'])
         df = df.dropna(dim='time', how='any')
 
-        pipe.unit_dictionnary = {}
-        for var in pipe.inputs_outputs.envir_variables :
-                pipe.unit_dictionnary[var] = df[var].attrs['unit']
-        for var in pipe.inputs_outputs.neuron_variables :
-                pipe.unit_dictionnary[var] = df[var].attrs['unit']
+        preprocess.unit_dictionnary = {}
+        for var in preprocess.inputs_outputs.envir_variables :
+                preprocess.unit_dictionnary[var] = df[var].attrs['unit']
+        for var in preprocess.inputs_outputs.neuron_variables :
+                preprocess.unit_dictionnary[var] = df[var].attrs['unit']
         
-        if not pipe.perform_decomp :
-                cut_low_freq_arg = np.argwhere(df.Frequency_psd.values>(pipe.split_transform.cut_low_frequency))[0][0]
+        if not preprocess.perform_decomp :
+                cut_low_freq_arg = np.argwhere(df.Frequency_psd.values>(preprocess.split_transform.cut_low_frequency))[0][0]
                 if math.log(cut_low_freq_arg,2) - int(math.log(cut_low_freq_arg,2)) != 0 :
                         cut_low_freq_arg = 345
-                        pipe.split_transform.cut_low_frequency =float(df["Frequency_psd"].isel(Frequency_psd= cut_low_freq_arg-1))
+                        preprocess.split_transform.cut_low_frequency =float(df["Frequency_psd"].isel(Frequency_psd= cut_low_freq_arg-1))
      
-        pipe.Frequency_psd =df['Frequency_psd'].where(df['Frequency_psd']>(pipe.split_transform.cut_low_frequency), drop=True)
+        preprocess.Frequency_psd =df['Frequency_psd'].where(df['Frequency_psd']>(preprocess.split_transform.cut_low_frequency), drop=True)
 
         ####
         # Re-arrange direction columns because 0/360 discontinuity do not fit with neural networks.
         ####
-        if pipe.feature_eng.envir_direction_dict is not None :
+        if preprocess.feature_eng.envir_direction_dict is not None :
                 # Select the sin_cos_method 
                 # The user can define a custom  method by adding a method to this class and then replace the sin_cos_method name to the hydra config file
-                if hasattr(pipe.feature_eng, pipe.feature_eng.sin_cos_method):
-                        log.info(f" run <{pipe.feature_eng.sin_cos_method}> method")
-                        df = getattr(pipe.feature_eng, pipe.feature_eng.sin_cos_method ) (pipe.feature_eng.envir_direction_dict, df)
-                        for magnitude, angle in pipe.feature_eng.envir_direction_dict.items() :
-                                pipe.inputs_outputs.envir_variables.remove(angle)
-                                pipe.inputs_outputs.envir_variables.append(f'{magnitude}_cos')
-                                pipe.inputs_outputs.envir_variables.append(f'{magnitude}_sin')
+                if hasattr(preprocess.feature_eng, preprocess.feature_eng.sin_cos_method):
+                        log.info(f" run <{preprocess.feature_eng.sin_cos_method}> method")
+                        df = getattr(preprocess.feature_eng, preprocess.feature_eng.sin_cos_method ) (preprocess.feature_eng.envir_direction_dict, df)
+                        for magnitude, angle in preprocess.feature_eng.envir_direction_dict.items() :
+                                preprocess.inputs_outputs.envir_variables.remove(angle)
+                                preprocess.inputs_outputs.envir_variables.append(f'{magnitude}_cos')
+                                preprocess.inputs_outputs.envir_variables.append(f'{magnitude}_sin')
         
         ####
         # Split data into train and test sets. 
         ####
-        # log.info(f"Instantiating split_transform <{pipe.preprocessing.split_transform._target_}>")
-        # split_transform: Split_transform = hydra.utils.instantiate(pipe.preprocessing.split_transform)
-        X_train, X_test, Y_train, Y_test = pipe.split_transform.process_data(df=df, 
-                                                                        X_channel_list=pipe.inputs_outputs.envir_variables,
-                                                                        Y_channel_list=pipe.inputs_outputs.neuron_variables,
-                                                                        df_train_set_envir_filename=pipe.paths.training_env_dataset)
+        X_train, X_test, Y_train, Y_test = preprocess.split_transform.process_data(df=df, 
+                                                                        X_channel_list=preprocess.inputs_outputs.envir_variables,
+                                                                        Y_channel_list=preprocess.inputs_outputs.neuron_variables,
+                                                                        df_train_set_envir_filename=preprocess.paths.training_env_dataset)
         ####
         # Scale input data with scaler defined in hydra config file
         ####
-        x_train, x_test  = pipe.envir_scaler.scale_data(X_train, X_test)
+        x_train, x_test  = preprocess.envir_scaler.scale_data(X_train, X_test)
 
         ####
         # Decompose y data with decomposition methode defined in hydra config file
         #### 
-        if pipe.perform_decomp :
-                Y_train, Y_test = pipe.decomp_y_spectrum.decomp_data(Y_train, Y_test)
+        if preprocess.perform_decomp :
+                Y_train, Y_test = preprocess.decomp_y_spectrum.decomp_data(Y_train, Y_test)
 
         ####
         # Scale Y spectrum data with scaler defined in hydra config file
         ####
-        y_train, y_test = pipe.y_spectrum_scaler.scale_data(Y_train, Y_test)
+        y_train, y_test = preprocess.y_spectrum_scaler.scale_data(Y_train, Y_test)
 
         ####
         # Shuffle training data
@@ -208,25 +203,6 @@ def Pre_process_data(pipe : Preprocessing):
         log.info(f'y_train shape: {np.shape(y_train)}')
 
         return x_train, y_train, x_test, y_test
-
-
-
-# def Train_model(pipe : PipeConfig, x_train : np.ndarray, y_train : np.ndarray, x_test : np.ndarray, y_test : np.ndarray, surrogate : SurrogateModel, x_scaler, y_scalers, unit_dictionnary, y_pcas) -> None:
-
-#         # Train model
-#         surrogate = surrogate(np.shape(y_train)[2], np.shape(x_train)[1])
-#         surrogate.dataset_path = pipe.paths.training_env_dataset
-#         surrogate.input_variables = pipe.inputs_outputs.envir_variables
-#         surrogate.output_variables = pipe.inputs_outputs.neuron_variables
-#         surrogate.Frequency_psd(pipe.preprocessing.cut_low_frequency)
-
-#         surrogate.set_units_dictionnary(unit_dictionnary)
-#         surrogate.set_modelname(pipe.model.name, pipe.model.version)
-
-#         return surrogate
-
-        
-
 
 if __name__ == "__main__":
     main()
