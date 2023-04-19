@@ -167,7 +167,7 @@ class Split_transform :
                     test_index += random.sample(range(i*div, len(training_list)), test_number_per_cluster)
                 
             test_index.sort()
-            df_test = df.iloc[test_index]
+            df_test = df.isel(time=test_index)
             df_training = df.drop(test_index, errors='ignore')
 
             nb_training_sample_in_bin = []
