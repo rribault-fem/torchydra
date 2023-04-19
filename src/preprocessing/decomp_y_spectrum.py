@@ -4,6 +4,7 @@ from typing import List
 import numpy as np
 import sklearn.decomposition as skldecomp
 from typing import List, Optional, Tuple
+import os
 
 @dataclass
 class Decomp_y_spectrum :
@@ -17,8 +18,7 @@ class Decomp_y_spectrum :
 
     def decomp_data(self, y_numpy_channels_training_set : np.array, y_numpy_channels_test_set: np.array) -> Tuple[np.array, np.array]:
         """ This function perform the pca on the y data"""
-        global logger_name 
-        log =logging.getLogger(logger_name)
+        log =logging.getLogger(os.environ['logger_name'])
         log.info('decomposition of the y spectrum data')
         
         # Prepare empty output arrays

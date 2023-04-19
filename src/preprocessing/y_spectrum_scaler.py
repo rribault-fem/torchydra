@@ -4,6 +4,7 @@ from typing import List
 import numpy as np
 import sklearn.preprocessing as sklpre
 from typing import List, Optional, Tuple
+import os
 
 @dataclass
 class Y_spectrum_scaler :
@@ -24,8 +25,8 @@ class Y_spectrum_scaler :
         Returns:
             tuple: A tuple containing two elements: y_train and y_test.
         """
-        global logger_name
-        log =  logging.getLogger(logger_name)
+        
+        log =  logging.getLogger(os.environ['logger_name'])
         log.info('scale the y spectrum data')
         
         # Prepare empty output arrays

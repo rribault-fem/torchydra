@@ -37,9 +37,8 @@ def main(cfg :  DictConfig):
         None
         """
         load_env_file(f"{hydra.utils.get_original_cwd()}/env.yaml")
-        global logger_name
-        logger_name = cfg.task_name
-        log = logging.getLogger(logger_name)
+        os.environ['logger_name'] = cfg.task_name
+        log = logging.getLogger(os.environ['logger_name'])
 
         # Instantiate preprocessing pipeline
         log.info(f"Instantiating Preprocessing <{cfg.preprocessing._target_}>")
@@ -163,6 +162,7 @@ def Pre_process_data(preprocess : Preprocessing):
                 # Select the sin_cos_method 
                 # The user can define a custom  method by adding a method to this class and then replace the sin_cos_method name to the hydra config file
                 if hasattr(preprocess.feature_eng, preprocess.feature_eng.sin_cos_method):
+                        log = logging.getLogger(os.environ['logger_name'])
                         log.info(f" run <{preprocess.feature_eng.sin_cos_method}> method")
                         df = getattr(preprocess.feature_eng, preprocess.feature_eng.sin_cos_method ) (preprocess.feature_eng.envir_direction_dict, df)
                         for magnitude, angle in preprocess.feature_eng.envir_direction_dict.items() :

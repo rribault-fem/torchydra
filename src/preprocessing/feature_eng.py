@@ -4,6 +4,7 @@ from typing import List, Any, Optional, Dict
 import xarray as xr
 import logging
 import numpy as np
+import os
 
 @dataclass
 class FeatureEng:
@@ -26,8 +27,8 @@ class FeatureEng:
         Returns:
             xr.Dataset: An xarray Dataset containing the original data as well as the calculated cosine and sine values.
         """
-        global logger_name 
-        log = logging.getLogger(logger_name)
+         
+        log = logging.getLogger(os.environ['logger_name'])
         log.info('###')
         log.info(f'get cos and sin decomposition of the data {dict_key}')
         for magnitude, angle in dict_key.items() :

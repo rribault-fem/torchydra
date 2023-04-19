@@ -4,6 +4,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
 import numpy as np
+import os
 
 
 @dataclass
@@ -24,8 +25,8 @@ class Envir_scaler :
         Returns:
             tuple: A tuple containing two elements: x_numpy_channels_training_set and x_numpy_channels_val_set.
         """
-        global logger_name
-        log =  logging.getLogger(logger_name)
+        
+        log =  logging.getLogger(os.environ['logger_name'])
         # Select user defined Scaler
         log.info('###')
         log.info("select environmental values scaler")
