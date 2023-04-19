@@ -4,7 +4,7 @@
 Easily add new models, datasets, experiments, preprocessing steps.
 By using this template, you can focus on deep learning architecture, hyperparameters tuning and share models and experiments with collegues.
 
-It is based on https://github.com/ashleve/lightning-hydra-template and uses the following packages:
+It is based on an opensource project template https://github.com/ashleve/lightning-hydra-template and uses the following packages:
 
 [PyTorch Lightning](https://github.com/PyTorchLightning/pytorch-lightning) - a lightweight PyTorch wrapper for high-performance AI research. Think of it as a framework for organizing your PyTorch code.
 
@@ -58,6 +58,9 @@ DVC pull
 select the path dedicated to your environment in the env.yaml file.
 
 ## How to run
+
+Select the output sub-directory by overriding the taks_name in train.yaml file.
+Describe your experiment with a tag in the train.yaml file.
 
 Train model with default configuration
 
@@ -182,6 +185,7 @@ After training, both the pipeline and trained model are saved for future use.
 ## Visualise training results
 
 To visualise the training results, you can use the [tensorboard](https://www.tensorflow.org/tensorboard) tool.
+Tensorboard is the default tool but others are available (cf lightning / hydra ashleve documentation)
 
 ```bash
 # from project root directory
@@ -212,3 +216,33 @@ refer to the available examples.
 Once the class created you need to change the `_target_` parameter in the `model_net` section of the `train.yaml` file.
 
 If needed you can create a new config file in `configs/model_net` to define new parameters for your model.
+
+
+## License
+
+Lightning-Hydra-Template is licensed under the MIT License.
+
+```
+MIT License
+
+Copyright (c) 2021 ashleve
+Copyright (c) 2023 rribault
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
