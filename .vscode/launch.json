@@ -9,7 +9,7 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "args" : ["experiment=conv1d_nopca.yaml"],
+            "args" : ["model_net=conv1d_surr.yaml"],
             "console": "integratedTerminal",
             "justMyCode": true
         }

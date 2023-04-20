@@ -19,7 +19,7 @@ It is based on an opensource project template https://github.com/ashleve/lightni
 
 ```bash
 # clone project
-git clone https://github.com/rribault-fem/Deep_learning_model_training
+git clone https://github.com/rribault-fem/torchydra
 cd your-repo-name
 
 # [OPTIONAL] create conda environment
@@ -36,7 +36,7 @@ pip install -r requirements.txt
 
 ```bash
 # clone project
-git clone https://github.com/rribault-fem/Deep_learning_model_training
+git clone https://github.com/rribault-fem/torchydra
 cd your-repo-name
 
 # create conda environment and install dependencies
