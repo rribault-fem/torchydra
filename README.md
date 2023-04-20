@@ -57,6 +57,22 @@ DVC pull
 
 select the path dedicated to your environment in the env.yaml file.
 
+```bash	
+# example of file for storing private and user specific environment variables, like keys or system paths
+# rename it to ".env" (excluded from version control by default)
+# .env is loaded by train.py automatically
+# hydra allows you to reference variables in .yaml configs with special syntax: ${oc.env:MY_VAR}
+
+# refer the dataset to use for training. Note that datasets are version controlled by DVC in the data/netcdf_databases folder
+DATASET_PATH: C:\Users\romain.ribault\Documents\GitHub\torchydra\data\netcdf_databases\reference_dataset_Zefyros_windeurope.nc
+
+# for inference with subsee4D path structure (FEM specific)
+INFER_SAVE_PATH: \\10.12.89.104\zefyros_calc\PreProd\storage
+
+# Refer the model and preprocessing parameters to use for inference:
+INFER_EXPERIMENT_PATH: C:\Users\romain.ribault\Documents\GitHub\Deep_learning_model_training\outputs\train_surrogate\runs\2023-04-18_09-19-57
+```
+
 ## How to run
 
 Select the output sub-directory by overriding the taks_name in train.yaml file.
@@ -174,6 +190,28 @@ The directory structure of new project looks like this:
 The `Pre_process_data` function is used to pre-process the data before training.
 It loads the dataset and performs various operations such as dropping missing values and rearranging direction columns.
 
+You can modify the pre-processing steps in the `configs\preprocessing\default.yaml` file.
+
+For example :
+Several scaler are available : all scalers from scikit-learn from scikit-learn. 
+for example you can change the environmental scaler type, edit the `envir_scaler.scaler._target_` of the envir_scaler object to any of the following:
+- sklearn.preprocessing.StandardScaler   
+- sklearn.preprocessing.MinMaxScaler
+- sklearn.preprocessing.MaxAbsScaler
+- ...
+
+Same applmies with the `y_spectrum_scaler` object.
+The scaler for measurement channels (y) changed by modifying the y_spectrum_scaler.scaler_options name.
+
+
+You can change the feature engineering method to a new function by changing the name of the 'sin_cos_method'.
+
+The split_method can be changed by defining a new function in the `src\preprocessing\split_transform.py` file and changing the name of the 'split_method' in the `configs\preprocessing\default.yaml` file.
+
+You can choose to perform or not perform a decomposition on the measurement channels (y) by changing the `perform_decomp` to True or False.
+The type of decomposition shall be defined in decomp_y_spectrum.decomp_option. It shall be sklearn.decomposition object.
+
+
 ## Training
 
 The `Train_model` function is used to train the surrogate model. It imports the specified model type and trains it on the pre-processed data.
@@ -194,12 +232,6 @@ tensorboard --logdir=outputs/train
 ```
 
 ## Configuration example
-Several scaler and decomposition methods are available : all scalers from scikit-learn and the decomposition methods from scikit-learn. 
-for example you can change the environmental scaler type, edit the `scaler_options` of the envir_scaler object to any of the following:
-- StandardScaler
-- MinMaxScaler
-- MaxAbsScaler
-- ...
 
 If required you can also implement you own scaler method in envir_scaler.py.
 
