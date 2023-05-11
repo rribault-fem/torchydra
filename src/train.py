@@ -4,7 +4,7 @@ import pickle
 import hydra
 from omegaconf import DictConfig
 import logging
-from config_schema import Preprocessing
+from Preprocessing import Preprocessing
 from model.surrogate_module import SurrogateModule
 from sklearn.utils import shuffle
 from lightning import Callback, LightningDataModule, Trainer
@@ -21,7 +21,7 @@ import math
 def main(cfg :  DictConfig):
         """
         This function serves as the main entry point for the script.
-        It takes in a configuration object from hydra coinfig files and uses it to train a surrogate model.
+        It takes in a configuration object from hydra config files and uses it to train a surrogate model.
         The function first creates an instance of the `Preprocessing` class using the provided configuration. 
         It then pre-processes the data using the `Pre_process_data` function.
 

@@ -1,1 +1,1 @@
-tensorboard --logdir outputs/train
+tensorboard --logdir outputs/train_surrogate
