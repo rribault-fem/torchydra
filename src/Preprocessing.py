@@ -10,7 +10,6 @@ import xarray as xr
 
 @dataclass
 class Preprocessing :    
-    paths : Dict
     inputs_outputs : Inputs_ouputs
     feature_eng : FeatureEng
     split_transform : Split_transform
