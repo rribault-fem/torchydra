@@ -4,7 +4,7 @@ import pickle
 import hydra
 from omegaconf import DictConfig
 import logging
-from config_schema import Preprocessing
+from Preprocessing import Preprocessing
 from model.surrogate_module import SurrogateModule
 from sklearn.utils import shuffle
 from lightning import Callback, LightningDataModule, Trainer
@@ -17,11 +17,11 @@ import os
 import math
 
 # version_base=1.1 is used to make hydra change the current working directory to the hydra output path
-@hydra.main(config_path="../configs", config_name="train.yaml", version_base="1.1")
+@hydra.main(config_path="../configs", config_name="train.yaml", version_base="1.3")
 def main(cfg :  DictConfig):
         """
         This function serves as the main entry point for the script.
-        It takes in a configuration object from hydra coinfig files and uses it to train a surrogate model.
+        It takes in a configuration object from hydra config files and uses it to train a surrogate model.
         The function first creates an instance of the `Preprocessing` class using the provided configuration. 
         It then pre-processes the data using the `Pre_process_data` function.
 
@@ -45,11 +45,11 @@ def main(cfg :  DictConfig):
         preprocess: Preprocessing = hydra.utils.instantiate(cfg.preprocessing)
         
         # Pre-process data
-        x_train, y_train, x_test, y_test = Pre_process_data(preprocess)
+        x_train, y_train, x_test, y_test = Pre_process_data(cfg, preprocess)
         
         # save the pipeline for future use and inverse transform
         log.info("Saving preprocessing")
-        file_path = 'preprocessing.pkl'
+        file_path = os.path.join(cfg.paths.output_dir, 'preprocessing.pkl')
         with open(file_path, 'wb') as f:
                 pickle.dump(preprocess, f)
 
@@ -119,7 +119,7 @@ def main(cfg :  DictConfig):
 
 
 
-def Pre_process_data(preprocess : Preprocessing):
+def Pre_process_data(cfg: DictConfig, preprocess : Preprocessing):
         """
         This function pre-processes the data before training. It takes in an instance of the `PipeConfig` class and uses it to perform various operations on the data.
 
@@ -138,7 +138,7 @@ def Pre_process_data(preprocess : Preprocessing):
         ####
         #Start pipeline
         ####
-        df = xr.open_dataset(preprocess.paths['dataset'])
+        df = xr.open_dataset(cfg.paths.dataset)
         df = df.dropna(dim='time', how='any')
 
         preprocess.unit_dictionnary = {}
@@ -176,7 +176,7 @@ def Pre_process_data(preprocess : Preprocessing):
         X_train, X_test, Y_train, Y_test = preprocess.split_transform.process_data(df=df, 
                                                                         X_channel_list=preprocess.inputs_outputs.envir_variables,
                                                                         Y_channel_list=preprocess.inputs_outputs.neuron_variables,
-                                                                        df_train_set_envir_filename=preprocess.paths.training_env_dataset)
+                                                                        df_train_set_envir_filename=cfg.paths.training_env_dataset)
         ####
         # Scale input data with scaler defined in hydra config file
         ####
