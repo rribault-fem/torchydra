@@ -2,17 +2,19 @@
 # This is the default config file for hydra
 # It is used to configure the training and testing of the model and the dataset
 
-_target_: config_schema.Preprocessing
+_target_: Preprocessing.Preprocessing
 
 defaults:
   - _self_
   - preprocessing: default.yaml
+  - paths: default.yaml
   - model : surrogate_module.yaml
   - model_net : conv1d_surr.yaml
   - trainer: cpu.yaml
   - callbacks : default.yaml
-  - logger: tensorboard.yaml
+  - logger: many_loggers.yaml
   - data : surrogate.yaml
+  - extras: default.yaml
   - hydra: default.yaml
 
   # experiment configs allow for version control of specific hyperparameters

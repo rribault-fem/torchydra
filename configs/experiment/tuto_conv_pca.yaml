@@ -1,0 +1,10 @@
+# @package _global_
+defaults:
+- override /model_net: conv1d_surr.yaml
+preprocessing:
+  perform_decomp: true
+tags:
+- surrogate
+- conv1d
+- PCA
+task_name: tutorial
