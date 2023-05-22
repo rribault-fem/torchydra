@@ -18,17 +18,20 @@ Easily add new models, datasets, experiments, preprocessing steps.
 [DVC](https://DVC) 
 
 # Knowledge pre-requisite
-You are expected to be a user of pytorch package.
+You are expected to know and use pytorch lightning package.
 
-Before using this project, you are intended to follow these tutorials :
+Before using this project, please follow these tutorials :
+
+for pytorch lightning :
+https://lightning.ai/docs/pytorch/stable/starter/introduction.html
 
 for hydra:
 https://www.youtube.com/watch?embeds_euri=https%3A%2F%2Fhydra.cc%2F&source_ve_path=Mjg2NjQsMTY0NTAz&feature=emb_share&v=tEsPyYnzt8s
 
 for DVC:
-
-
-for lightning :
+https://www.youtube.com/watch?v=kLKBcPonMYw&t=4s
+&
+https://www.youtube.com/watch?v=9BgIDqAzfuA
 
 
 
@@ -108,31 +111,17 @@ cd your-repo-name
 conda create -n myenv python=3.9
 conda activate myenv
 
-# install pytorch according to instructions
-# https://pytorch.org/get-started/
-
 # install requirements
 pip install -r requirements.txt
 
 # install the project folder as a package
 pip install -e .
 ```
-#### Conda
-```bash
-# clone project
-git clone https://github.com/rribault-fem/torchydra
-cd your-repo-name
-
-# create conda environment and install dependencies
-conda env create -f environment.yaml -n myenv
-
-# activate conda environment
-conda activate myenv
-```
 
 #### install and first DVC pull
 DVC allows to store and version control datasets, models and artifacts of model training.
-You need a Dionysos google drive access validation from romain.ribault@france-energies-marines.org.
+First you need to ask access to the google drive folder.
+Send an email to : romain.ribault@france-energies-marines.org.
 
 ```bash	
 # install DVC
@@ -141,6 +130,9 @@ pip install "dvc[gdrive]"
 # from project root directory, recover the shared models and datasets
 DVC pull
 ```
+
+DVC will ask you to authenticate to the google drive folder.
+copy past the link in a navigator and copy the verifivation code in the terminal. 
 
 #### env.yaml file
 
@@ -155,16 +147,9 @@ select the path dedicated to your environment in the env.yaml file.
 
 PROJECT_ROOT: C:\Users\my.user\Documents\GitHub\torchydra
 
-# for train.py - refer the dataset to use for training. Note that datasets are version controlled by DVC in the data/netcdf_databases folder
-DATASET_PATH: C:\Users\romain.ribault\Documents\GitHub\torchydra\data\netcdf_databases\reference_dataset_Zefyros_windeurope.nc
-
 # for surrogate_inference.py only -  with subsee4D path structure (FEM specific) 
 INFER_SAVE_PATH: \\10.12.89.104\zefyros_calc\PreProd\storage
-
-# for surrogate_inference.py only - Refer the model and preprocessing parameters to use for inference:
-INFER_EXPERIMENT_PATH: C:\Users\romain.ribault\Documents\GitHub\Deep_learning_model_training\outputs\train_surrogate\runs\2023-04-18_09-19-57
-```
-
+```	
 ## How to run
 
 Select the output sub-directory by overriding the taks_name in train.yaml file.

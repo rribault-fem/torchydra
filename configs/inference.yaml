@@ -11,7 +11,7 @@ task_name: "eval"
 tags: ["dev"]
 
 # passing checkpoint path is necessary for evaluation
-experiment_folder: outputs\train_surrogate\runs\2023-05-12_11-33-01
+experiment_folder: outputs\train_surrogate\runs\2023-05-12_15-07-15
 
 # location of envir files for inference and for storing the model inference results. 
 save_path: ${oc.env:INFER_SAVE_PATH}

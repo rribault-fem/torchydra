@@ -134,11 +134,12 @@ class Neuron():
         self.rsetattr(self,f"{channel_name}.values", values)
         self.rsetattr(self,f"{channel_name}.unit", unit_dictionnary[channel_name])
 
-    def save_nc(self,date, save_path, ann_name = "ann_Neuron_Tower"):
+    def save_nc(self,date : str, save_path : str, ann_name :str = "ann_Neuron_Tower") -> str:
         xr_ds = self.create_xr_Dataset()
         url_base = os.path.join(f"{save_path}/{date.replace('-','/')}/ANN/{ann_name}")
         os.makedirs(url_base, exist_ok=True)
         xr_ds.to_netcdf(os.path.join(url_base,f'{ann_name}_{date}.nc'),engine='netcdf4')
+        return url_base
 # @ USER DEFINED METHODS END
 #------------------------------------
 

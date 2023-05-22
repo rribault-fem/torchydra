@@ -211,7 +211,8 @@ def inference(cfg : DictConfig):
 
     # Save netcdf file
     log.info('Save netcdf file')
-    neuron.save_nc(DATE, SAVE_PATH, ann_name=f'surrogate_Neuron_Tower')
+    saved_path = neuron.save_nc(DATE, SAVE_PATH, ann_name=neuron.source)
+    log.info(f'MODEL INFERENCE OUTPUTS saved in {saved_path} ')
 
     metric_dict = {}
     object_dict = {}

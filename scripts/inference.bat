@@ -1,0 +1,1 @@
+python src/surrogate_inference.py experiment=conv1d_nopca.yaml
