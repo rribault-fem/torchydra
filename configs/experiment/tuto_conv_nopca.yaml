@@ -1,0 +1,10 @@
+# @package _global_
+defaults:
+- override /model_net: conv1d_surr_nopca.yaml
+preprocessing:
+  perform_decomp: false
+tags:
+- surrogate
+- conv1d
+- NoPCA
+task_name: tutorial

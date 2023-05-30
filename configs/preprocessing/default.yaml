@@ -1,10 +1,9 @@
-_target_ : config_schema.Preprocessing
+_target_ : Preprocessing.Preprocessing
   # Split transform step : split the dataset into a training and a test set
   # Then transform the xr:datasets into numpy arrays
 
 defaults :
  - _self_
- - paths : default.yaml
  - inputs_outputs : default.yaml
 
 

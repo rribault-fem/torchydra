@@ -1,0 +1,20 @@
+# @package _global_
+
+defaults:
+  - _self_
+  - hydra: default.yaml
+  - extras: default.yaml
+  - paths: default.yaml
+
+
+task_name: "eval"
+tags: ["dev"]
+
+# passing checkpoint path is necessary for evaluation
+experiment_folder: outputs\train_surrogate\runs\2023-05-12_15-07-15
+
+# location of envir files for inference and for storing the model inference results. 
+save_path: ${oc.env:INFER_SAVE_PATH}
+
+# Inference date
+date: '2022-12-02'

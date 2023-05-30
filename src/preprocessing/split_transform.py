@@ -233,12 +233,13 @@ class Split_transform :
     
     def get_numpy_input_envir_set(self, df, envir_variables) :
         # loading channels data in numpy for CNN 
-        
+        log = logging.getLogger(os.environ['logger_name'])
         input_envir_set = np.empty_like(np.expand_dims(df[envir_variables[0]].values, axis = 1))
         for env_var in envir_variables :
             input_envir = np.expand_dims(df[env_var].values, axis = 1)
             input_envir_set = np.append(input_envir_set, input_envir, axis = 1)
         input_envir_set = np.delete(input_envir_set, 0, axis=1)
+        log.info('# input_envir_set shape is {}'.format(str(np.shape(input_envir_set))))
         return input_envir_set
 
     def get_numpy_input_channel_set(self, df, channels) :

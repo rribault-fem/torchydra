@@ -1,0 +1,6 @@
+# https://dvc.org/doc/dvclive/ml-frameworks/pytorch-lightning/
+
+dvclive:
+  _target_: dvclive.lightning.DVCLiveLogger
+  dir: ${paths.output_dir}/dvclive
+  save_dvc_exp: True
