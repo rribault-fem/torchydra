@@ -23,15 +23,15 @@ You are expected to know and use pytorch lightning package.
 Before using this project, please follow these tutorials :
 
 for pytorch lightning :
-https://lightning.ai/docs/pytorch/stable/starter/introduction.html
+[![Lignthning intro](https://lightning.ai/docs/pytorch/stable/starter/introduction.html)](https://lightning.ai/docs/pytorch/stable/starter/introduction.html)
 
 for hydra:
-https://www.youtube.com/watch?embeds_euri=https%3A%2F%2Fhydra.cc%2F&source_ve_path=Mjg2NjQsMTY0NTAz&feature=emb_share&v=tEsPyYnzt8s
+[hydra tuto](https://www.youtube.com/watch?embeds_euri=https%3A%2F%2Fhydra.cc%2F&source_ve_path=Mjg2NjQsMTY0NTAz&feature=emb_share&v=tEsPyYnzt8s)
 
 for DVC:
-https://www.youtube.com/watch?v=kLKBcPonMYw&t=4s
+[DVC intro](https://www.youtube.com/watch?v=kLKBcPonMYw&t=4s)
 &
-https://www.youtube.com/watch?v=9BgIDqAzfuA
+[DVC tuto](https://www.youtube.com/watch?v=9BgIDqAzfuA)
 
 
 
