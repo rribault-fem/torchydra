@@ -14,7 +14,7 @@ tags: ["dev"]
 experiment_folder: outputs\train_surrogate\runs\2023-05-12_15-07-15
 
 # location of envir files for inference and for storing the model inference results. 
-save_path: ${oc.env:INFER_SAVE_PATH}
+save_path: ${paths.data_dir}/for_1RRI_tutorial
 
 # Inference date
 date: '2022-12-02'

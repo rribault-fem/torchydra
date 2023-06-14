@@ -15,7 +15,7 @@ Easily add new models, datasets, experiments, preprocessing steps.
 
 [Hydra](https://github.com/facebookresearch/hydra) - a framework for elegantly configuring complex applications. The key feature is the ability to dynamically create a hierarchical configuration by composition and override it through config files and the command line.
 
-[DVC](https://DVC) 
+[DVC](https://dvc.org/doc/install/windows) - Data Version Control (DVC) is an open-source tool for data science and machine learning projects. It is designed to handle large files, data sets, machine learning models, and metrics as well as code. DVC is compatible with Git for storing code and the Git-LFS extension for storing data sets and models.
 
 # Knowledge pre-requisite
 You are expected to know and use pytorch lightning package.
@@ -23,15 +23,15 @@ You are expected to know and use pytorch lightning package.
 Before using this project, please follow these tutorials :
 
 for pytorch lightning :
-https://lightning.ai/docs/pytorch/stable/starter/introduction.html
+[![Lignthning intro](https://lightning.ai/docs/pytorch/stable/starter/introduction.html)](https://lightning.ai/docs/pytorch/stable/starter/introduction.html)
 
 for hydra:
-https://www.youtube.com/watch?embeds_euri=https%3A%2F%2Fhydra.cc%2F&source_ve_path=Mjg2NjQsMTY0NTAz&feature=emb_share&v=tEsPyYnzt8s
+[hydra tuto](https://www.youtube.com/watch?embeds_euri=https%3A%2F%2Fhydra.cc%2F&source_ve_path=Mjg2NjQsMTY0NTAz&feature=emb_share&v=tEsPyYnzt8s)
 
 for DVC:
-https://www.youtube.com/watch?v=kLKBcPonMYw&t=4s
+[DVC intro](https://www.youtube.com/watch?v=kLKBcPonMYw&t=4s)
 &
-https://www.youtube.com/watch?v=9BgIDqAzfuA
+[DVC tuto](https://www.youtube.com/watch?v=9BgIDqAzfuA)
 
 
 
@@ -150,6 +150,9 @@ PROJECT_ROOT: C:\Users\my.user\Documents\GitHub\torchydra
 # for surrogate_inference.py only -  with subsee4D path structure (FEM specific) 
 INFER_SAVE_PATH: \\10.12.89.104\zefyros_calc\PreProd\storage
 ```	
+
+## Perform first tutorial
+Refer to the notebooks\1_RRI_tutorial.ipynb tutorial now!
 ## How to run
 
 Select the output sub-directory by overriding the taks_name in train.yaml file.
